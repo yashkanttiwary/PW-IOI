@@ -24,19 +24,16 @@ export default function App() {
     return <APIKeyGate />;
   }
 
-  const renderModule = () => {
-    switch (state.currentModule) {
-      case 'dashboard': return <Dashboard />;
-      case 'funnel_command': return <FunnelCommand />;
-      case 'event_builder': return <EventBuilder />;
-      case 'campaign_architect': return <CampaignArchitect />;
-      case 'persona_lab': return <PersonaLab />;
-      case 'ab_test': return <ABTestStudio />;
-      case 'blocker_radar': return <BlockerRadar />;
-      case 'campaign_auditor': return <CampaignAuditor />;
-      default: return <Dashboard />;
-    }
-  };
+  const modules = {
+    dashboard: <Dashboard />,
+    funnel_command: <FunnelCommand />,
+    event_builder: <EventBuilder />,
+    campaign_architect: <CampaignArchitect />,
+    persona_lab: <PersonaLab />,
+    ab_test: <ABTestStudio />,
+    blocker_radar: <BlockerRadar />,
+    campaign_auditor: <CampaignAuditor />,
+  } as const;
 
   return (
     <div className="flex h-screen bg-[#050505] text-white font-sans overflow-hidden">
@@ -46,7 +43,15 @@ export default function App() {
         <AIErrorBanner />
         <GlobalBlockerSummary />
         <main className="flex-1 overflow-y-auto">
-          {renderModule()}
+          {Object.entries(modules).map(([moduleId, moduleComponent]) => (
+            <section
+              key={moduleId}
+              className={state.currentModule === moduleId ? 'block' : 'hidden'}
+              aria-hidden={state.currentModule !== moduleId}
+            >
+              {moduleComponent}
+            </section>
+          ))}
         </main>
         {state.activeConversation?.lastAutoAudit && (
           <AutoAuditBar audit={state.activeConversation.lastAutoAudit} />

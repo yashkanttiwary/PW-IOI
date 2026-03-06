@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { callAI } from '../../engine/ai/client';
+import { DEFAULT_GEMINI_MODEL, RECOMMENDED_GEMINI_MODELS } from '../../engine/ai/modelConfig';
 
 export default function APIKeyGate() {
   const { state, dispatch } = useAppStore();
   const [apiKey, setApiKey] = useState(state.aiConfig?.apiKey || '');
-  const [model, setModel] = useState(state.aiConfig?.model || 'gemini-2.5-flash');
+  const [model, setModel] = useState(state.aiConfig?.model || DEFAULT_GEMINI_MODEL);
   const [error, setError] = useState('');
   const [testing, setTesting] = useState(false);
   const [testStatus, setTestStatus] = useState('');
@@ -28,7 +29,7 @@ export default function APIKeyGate() {
 
     dispatch({
       type: 'SET_AI_CONFIG',
-      payload: { apiKey: trimmed, model: model.trim() || 'gemini-2.5-flash' },
+      payload: { apiKey: trimmed, model: model.trim() || DEFAULT_GEMINI_MODEL },
     });
     dispatch({ type: 'SET_AI_ERROR', payload: null });
     dispatch({ type: 'CLOSE_AI_GATE' });
@@ -50,7 +51,7 @@ export default function APIKeyGate() {
     const result = await callAI({
       module: 'dashboard',
       apiKey: trimmed,
-      model: model.trim() || 'gemini-2.5-flash',
+      model: model.trim() || DEFAULT_GEMINI_MODEL,
       systemPrompt: 'You are a connectivity checker.',
       modulePrompt: 'Return exactly: CONNECTION_OK',
       messages: [{ role: 'user', content: 'Respond with CONNECTION_OK' }],
@@ -106,12 +107,12 @@ export default function APIKeyGate() {
                   setModel(e.target.value);
                   setIsValidated(false);
                 }}
-                placeholder="gemini-2.5-flash"
+                placeholder={DEFAULT_GEMINI_MODEL}
                 className="w-full bg-[#0D0D0D] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#00F5FF] outline-none"
               />
-              <p className="text-xs text-[#A0A0A0] mt-2">Recommended for testing: gemini-2.5-flash. You can also enter Pro or any Gemini model available on your key.</p>
+              <p className="text-xs text-[#A0A0A0] mt-2">Default: {DEFAULT_GEMINI_MODEL}. You can also enter any Gemini model available on your key.</p>
               <div className="flex flex-wrap gap-2 mt-3">
-                {['gemini-2.5-flash', 'gemini-2.5-pro'].map((m) => (
+                {RECOMMENDED_GEMINI_MODELS.map((m) => (
                   <button
                     key={m}
                     onClick={() => {

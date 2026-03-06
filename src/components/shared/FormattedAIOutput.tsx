@@ -24,13 +24,46 @@ function prettyLabel(key: string) {
     .replace(/^./, (c) => c.toUpperCase());
 }
 
+function decodeHtmlEntities(text: string) {
+  return text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
+function looksLikeHtml(text: string) {
+  return /<\/?[a-z][\s\S]*>/i.test(text);
+}
+
+function RichTextBlock({ text }: { text: string }) {
+  const decoded = decodeHtmlEntities(text);
+
+  if (looksLikeHtml(decoded)) {
+    return (
+      <div
+        className="text-white whitespace-pre-wrap"
+        dangerouslySetInnerHTML={{ __html: decoded }}
+      />
+    );
+  }
+
+  return (
+    <div className="prose prose-invert max-w-none">
+      <ReactMarkdown>{decoded}</ReactMarkdown>
+    </div>
+  );
+}
+
 function RenderValue({ value, depth = 0 }: { value: any; depth?: number }) {
   if (value === null || value === undefined) {
     return <span className="text-[#777]">—</span>;
   }
 
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return <div className="text-white whitespace-pre-wrap">{String(value)}</div>;
+    return <RichTextBlock text={String(value)} />;
   }
 
   if (Array.isArray(value)) {
@@ -65,7 +98,7 @@ export default function FormattedAIOutput({ text, blockerReport }: { text: strin
   if (!parsed) {
     return (
       <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 prose prose-invert max-w-none">
-        <ReactMarkdown>{text}</ReactMarkdown>
+        <RichTextBlock text={text} />
       </div>
     );
   }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { orchestrateAudit } from '../../engine/orchestrators';
 import { CheckSquare, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import FormattedAIOutput from '../shared/FormattedAIOutput';
 
 export default function CampaignAuditor() {
   const { state, dispatch } = useAppStore();
@@ -156,9 +156,9 @@ export default function CampaignAuditor() {
               </div>
 
               {report.parsed.improvedVersion && (
-                <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 prose prose-invert max-w-none">
+                <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 max-w-none">
                   <h3 className="text-lg font-bold text-[#00F5FF] mb-4">Improved Version</h3>
-                  <ReactMarkdown>{report.parsed.improvedVersion}</ReactMarkdown>
+                  <FormattedAIOutput text={report.parsed.improvedVersion} />
                 </div>
               )}
             </>

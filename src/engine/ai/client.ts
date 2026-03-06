@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { DEFAULT_GEMINI_MODEL } from './modelConfig';
 
 const MODULE_CONFIG: Record<string, any> = {
   dashboard:         { maxTokens: 500,  temp: 0.2, stream: false },
@@ -34,7 +35,7 @@ function parseGeminiError(err: any) {
   if (status === 'RESOURCE_EXHAUSTED' || code === 429 || lowerMessage.includes('quota')) {
     const friendly = [
       'Quota limit reached for this model/key.',
-      'Try gemini-2.5-flash, wait for quota reset, or enable billing in Google AI Studio.',
+      'Try a lower-cost model like gemini-2.5-flash, wait for quota reset, or enable billing in Google AI Studio.',
       retryDelay ? `Retry suggested after: ${retryDelay}.` : null,
     ].filter(Boolean).join(' ');
 
@@ -60,7 +61,7 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages, api
 
   try {
     const runtimeApiKey = apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const runtimeModel = model || process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
+    const runtimeModel = model || process.env.NEXT_PUBLIC_GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 
     if (!runtimeApiKey) {
       throw new Error('Missing Gemini API key. Open AI Settings and add your key.');
@@ -68,7 +69,7 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages, api
 
     const ai = new GoogleGenAI({ apiKey: runtimeApiKey });
 
-    const fullSystemInstruction = `${systemPrompt}\n\n${modulePrompt}`;
+    const fullSystemInstruction = `${systemPrompt}\n\n${modulePrompt}\n\nOUTPUT FORMAT RULES:\n- Write clean, professional English.\n- Do not return escaped HTML entities like &lt;div&gt;; use normal text/markdown.\n- If HTML is needed, return valid semantic HTML tags, not encoded HTML.`;
     const contents = messages.map((m: any) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],

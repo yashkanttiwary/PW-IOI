@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { getCalendarPhase } from '../engine/calendar/calendarEngine';
+import { DEFAULT_GEMINI_MODEL } from '../engine/ai/modelConfig';
 
 const AI_MODEL_STORAGE = 'ion_ai_model';
 
@@ -17,7 +18,7 @@ export const INITIAL_STATE = {
   },
   aiConfig: {
     apiKey: '',
-    model: 'gemini-2.5-flash',
+    model: DEFAULT_GEMINI_MODEL,
     isConfigured: false,
   },
   ui: {
@@ -46,7 +47,6 @@ export function appReducer(state: any, action: any) {
         activeConversation: {
           ...state.activeConversation,
           module: action.payload,
-          history: [],
         },
       };
 
@@ -58,7 +58,7 @@ export function appReducer(state: any, action: any) {
         ...state,
         aiConfig: {
           apiKey: action.payload.apiKey,
-          model: action.payload.model || 'gemini-2.5-flash',
+          model: action.payload.model || DEFAULT_GEMINI_MODEL,
           isConfigured: Boolean(action.payload.apiKey),
         },
       };
@@ -165,12 +165,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     dispatch({ type: 'SET_CALENDAR_PHASE', payload: getCalendarPhase() });
 
-    const savedModel = localStorage.getItem(AI_MODEL_STORAGE) || 'gemini-2.5-flash';
+    const savedModel = localStorage.getItem(AI_MODEL_STORAGE) || DEFAULT_GEMINI_MODEL;
     dispatch({ type: 'SET_AI_CONFIG', payload: { apiKey: '', model: savedModel } });
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(AI_MODEL_STORAGE, state.aiConfig.model || 'gemini-2.5-flash');
+    localStorage.setItem(AI_MODEL_STORAGE, state.aiConfig.model || DEFAULT_GEMINI_MODEL);
   }, [state.aiConfig.model]);
 
   return (

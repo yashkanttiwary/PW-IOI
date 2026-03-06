@@ -47,7 +47,7 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages }: a
       latencyMs: Date.now() - startTime,
     };
   } catch (err: any) {
-    console.error(`ION AI call failed [\${module}]:`, err);
+    console.error(`ION AI call failed [${module}]:`, err);
     return {
       success: false,
       data: null,

@@ -1,6 +1,13 @@
 import { CONVERSION_BENCHMARKS } from '../constants/benchmarks';
 
-export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario = 'realistic', overrides = {} }: any) {
+type FunnelStage = {
+  id: string;
+  volume: number | null;
+  rate: number | null;
+  dropoff: number | null;
+};
+
+export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario = 'realistic', overrides = {} }: any): any {
   const b = CONVERSION_BENCHMARKS as any;
   const getRate = (stage: string) => {
     if (overrides[stage]) return overrides[stage];
@@ -13,7 +20,7 @@ export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario
       ? getRate('views_to_signup')
       : (getRate('views_to_signup') + getRate('footfall_to_signup')) / 2;
 
-  const stages = [
+  const stages: FunnelStage[] = [
     { id: 'views',     volume: tofuVolume, rate: null,                        dropoff: null },
     { id: 'signup',    volume: null,       rate: firstRate,                   dropoff: null },
     { id: 'app',       volume: null,       rate: getRate('signup_to_app'),    dropoff: null },
@@ -23,20 +30,25 @@ export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario
   ];
 
   for (let i = 1; i < stages.length; i++) {
-    stages[i].volume = Math.round(stages[i - 1].volume * stages[i].rate);
-    stages[i].dropoff = 1 - stages[i].rate;
+    const prevVolume = stages[i - 1].volume ?? 0;
+    const rate = stages[i].rate ?? 0;
+
+    stages[i].volume = Math.round(prevVolume * rate);
+    stages[i].dropoff = 1 - rate;
   }
+
+  const totalAdmissions = stages[stages.length - 1].volume ?? 0;
 
   return {
     scenario,
     channel,
     stages,
-    totalAdmissions: stages[stages.length - 1].volume,
-    overallConversionRate: stages[stages.length - 1].volume / tofuVolume,
+    totalAdmissions,
+    overallConversionRate: totalAdmissions / tofuVolume,
   };
 }
 
-export function projectFunnelReverse({ targetAdmissions, channel = 'blended', scenario = 'realistic', overrides = {} }: any) {
+export function projectFunnelReverse({ targetAdmissions, channel = 'blended', scenario = 'realistic', overrides = {} }: any): any {
   const b = CONVERSION_BENCHMARKS as any;
   const getRate = (stage: string) => overrides[stage] || b[stage][scenario].rate;
 

@@ -68,7 +68,7 @@ export function appReducer(state: any, action: any) {
         savedPlans: [
           {
             ...action.payload,
-            id: `plan_\${Date.now()}`,
+            id: `plan_${Date.now()}`,
             savedAt: new Date().toISOString(),
           },
           ...state.savedPlans,
@@ -81,7 +81,7 @@ export function appReducer(state: any, action: any) {
         savedPersonas: [
           {
             ...action.payload,
-            id: `custom_\${Date.now()}`,
+            id: `custom_${Date.now()}`,
             createdAt: new Date().toISOString(),
           },
           ...state.savedPersonas,

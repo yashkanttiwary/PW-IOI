@@ -14,30 +14,72 @@ const MODULE_CONFIG: Record<string, any> = {
   copy_generator:    { maxTokens: 1500, temp: 0.7, stream: false },
 };
 
-export async function callAI({ module, systemPrompt, modulePrompt, messages }: any) {
+function getRuntimeAIConfig(passedApiKey?: string, passedModel?: string) {
+  const browserApiKey = typeof window !== 'undefined' ? localStorage.getItem('ion_api_key') : '';
+  const browserModel = typeof window !== 'undefined' ? localStorage.getItem('ion_ai_model') : '';
+
+  return {
+    apiKey: passedApiKey || browserApiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+    model: passedModel || browserModel || process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash',
+  };
+}
+
+function parseGeminiError(err: any) {
+  const rawMessage = err?.message || 'Unknown error';
+  let parsed: any = null;
+
+  try {
+    parsed = JSON.parse(rawMessage);
+  } catch {
+    parsed = null;
+  }
+
+  const message = parsed?.error?.message || rawMessage;
+  const status = parsed?.error?.status || null;
+  const code = parsed?.error?.code || null;
+  const retryInfo = parsed?.error?.details?.find((d: any) => d?.['@type']?.includes('RetryInfo'));
+  const retryDelay = retryInfo?.retryDelay || null;
+  const lowerMessage = String(message).toLowerCase();
+
+  if (status === 'RESOURCE_EXHAUSTED' || code === 429 || lowerMessage.includes('quota')) {
+    const friendly = [
+      'Quota limit reached for this model/key.',
+      'Try gemini-2.5-flash, wait for quota reset, or enable billing in Google AI Studio.',
+      retryDelay ? `Retry suggested after: ${retryDelay}.` : null,
+    ].filter(Boolean).join(' ');
+
+    return { message: friendly, details: message, code, status, retryDelay };
+  }
+
+  return { message, details: message, code, status, retryDelay };
+}
+
+export async function callAI({ module, systemPrompt, modulePrompt, messages, apiKey, model }: any) {
   const config = MODULE_CONFIG[module] || MODULE_CONFIG.dashboard;
   const startTime = Date.now();
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
-    
-    // Combine system prompt and module prompt
-    const fullSystemInstruction = systemPrompt + '\\n\\n' + modulePrompt;
-    
-    // Format messages for Gemini
+    const runtime = getRuntimeAIConfig(apiKey, model);
+
+    if (!runtime.apiKey) {
+      throw new Error('Missing Gemini API key. Open AI Settings and add your key.');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: runtime.apiKey });
+
+    const fullSystemInstruction = systemPrompt + '\n\n' + modulePrompt;
     const contents = messages.map((m: any) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: contents,
+      model: runtime.model,
+      contents,
       config: {
         systemInstruction: fullSystemInstruction,
         temperature: config.temp,
-        // maxOutputTokens: config.maxTokens,
-      }
+      },
     });
 
     return {
@@ -47,12 +89,15 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages }: a
       latencyMs: Date.now() - startTime,
     };
   } catch (err: any) {
-    console.error(`ION AI call failed [\${module}]:`, err);
+    console.error(`ION AI call failed [${module}]:`, err);
+    const parsedError = parseGeminiError(err);
+
     return {
       success: false,
       data: null,
       text: '',
-      error: err.message,
+      error: parsedError.message,
+      errorDetails: parsedError,
       latencyMs: Date.now() - startTime,
     };
   }

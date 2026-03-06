@@ -15,7 +15,7 @@ export default function BoardSummaryCard({ data }: { data: any }) {
         <div>
           <div className="text-xs text-[#A0A0A0] mb-1">Goal / Target</div>
           <div className="text-xl font-bold text-white">
-            {data.goal || `\${formatNumber(data.targetAdmissions || data.funnel?.totalAdmissions)} Admissions`}
+            {data.goal || `${formatNumber(data.targetAdmissions || data.funnel?.totalAdmissions)} Admissions`}
           </div>
         </div>
         

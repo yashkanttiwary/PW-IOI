@@ -13,9 +13,14 @@ import ABTestStudio from './components/modules/ABTestStudio';
 import BlockerRadar from './components/modules/BlockerRadar';
 import CampaignAuditor from './components/modules/CampaignAuditor';
 import AutoAuditBar from './components/shared/AutoAuditBar';
+import APIKeyGate from './components/shared/APIKeyGate';
 
 export default function App() {
   const { state } = useAppStore();
+
+  if (state.ui?.showApiGate || !state.aiConfig?.isConfigured) {
+    return <APIKeyGate />;
+  }
 
   const renderModule = () => {
     switch (state.currentModule) {

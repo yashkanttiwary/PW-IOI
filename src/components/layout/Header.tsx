@@ -4,7 +4,7 @@ import React from 'react';
 import { useAppStore } from '../../store/appStore';
 
 export default function Header() {
-  const { state } = useAppStore();
+  const { state, dispatch } = useAppStore();
   const phase = state.calendarPhase;
 
   return (
@@ -14,19 +14,28 @@ export default function Header() {
           {state.currentModule.replace('_', ' ')}
         </h2>
       </div>
-      
-      {phase && (
-        <div 
-          className="px-4 py-1.5 rounded-full flex items-center space-x-2 border"
-          style={{ 
-            backgroundColor: phase.bgColor, 
-            borderColor: phase.color,
-            color: phase.color 
-          }}
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => dispatch({ type: 'OPEN_AI_GATE' })}
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#333] text-[#A0A0A0] hover:text-white hover:border-[#00F5FF]"
         >
-          <span className="text-sm font-bold tracking-wide">{phase.badge}</span>
-        </div>
-      )}
+          AI Settings
+        </button>
+
+        {phase && (
+          <div
+            className="px-4 py-1.5 rounded-full flex items-center space-x-2 border"
+            style={{
+              backgroundColor: phase.bgColor,
+              borderColor: phase.color,
+              color: phase.color,
+            }}
+          >
+            <span className="text-sm font-bold tracking-wide">{phase.badge}</span>
+          </div>
+        )}
+      </div>
     </header>
   );
 }

@@ -8,6 +8,7 @@ import { Calendar, Users, MapPin, IndianRupee } from 'lucide-react';
 export default function EventBuilder() {
   const { state, dispatch } = useAppStore();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     eventType: 'Campus Open Day',
@@ -21,7 +22,14 @@ export default function EventBuilder() {
 
   const handleGenerate = async () => {
     setLoading(true);
-    await orchestrateEventBuilder(formData, state, dispatch);
+    const result: any = await orchestrateEventBuilder(formData, state, dispatch);
+
+    if (result?.success === false) {
+      setError(result.error || 'Failed to generate event plan.');
+    } else {
+      setError('');
+    }
+
     setLoading(false);
   };
 
@@ -32,6 +40,12 @@ export default function EventBuilder() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">Event Builder</h1>
       </div>
+
+      {error && (
+        <div className="mb-6 text-sm text-[#FF9100] bg-[#FF9100]/10 border border-[#FF9100]/30 rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Input Form */}

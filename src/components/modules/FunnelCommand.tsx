@@ -9,6 +9,7 @@ import FormattedAIOutput from '../shared/FormattedAIOutput';
 export default function FunnelCommand() {
   const { state, dispatch } = useAppStore();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [mode, setMode] = useState('full_semester');
   
   const [formData, setFormData] = useState({
@@ -22,7 +23,14 @@ export default function FunnelCommand() {
 
   const handleGenerate = async () => {
     setLoading(true);
-    await orchestrateFunnelCommand(mode, formData, state, dispatch);
+    const result: any = await orchestrateFunnelCommand(mode, formData, state, dispatch);
+
+    if (result?.success === false) {
+      setError(result.error || 'Failed to generate funnel projection.');
+    } else {
+      setError('');
+    }
+
     setLoading(false);
   };
 
@@ -43,6 +51,12 @@ export default function FunnelCommand() {
           <option value="compare">Compare Scenarios</option>
         </select>
       </div>
+
+      {error && (
+        <div className="mb-6 text-sm text-[#FF9100] bg-[#FF9100]/10 border border-[#FF9100]/30 rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Input Form */}

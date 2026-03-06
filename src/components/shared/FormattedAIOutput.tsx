@@ -3,10 +3,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
-function isPrimitive(v: any) {
-  return ['string', 'number', 'boolean'].includes(typeof v) || v === null;
-}
-
 function tryParseJson(text: string) {
   const trimmed = text.trim();
   if (!trimmed) return null;
@@ -28,6 +24,41 @@ function prettyLabel(key: string) {
     .replace(/^./, (c) => c.toUpperCase());
 }
 
+function RenderValue({ value, depth = 0 }: { value: any; depth?: number }) {
+  if (value === null || value === undefined) {
+    return <span className="text-[#777]">—</span>;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return <div className="text-white whitespace-pre-wrap">{String(value)}</div>;
+  }
+
+  if (Array.isArray(value)) {
+    return (
+      <div className="space-y-2">
+        {value.map((item, idx) => (
+          <div key={idx} className="bg-[#111111] border border-[#333] rounded-lg p-3">
+            <RenderValue value={item} depth={depth + 1} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const entries = Object.entries(value);
+
+  return (
+    <div className={`grid gap-3 ${depth === 0 ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+      {entries.map(([k, v]) => (
+        <div key={k} className="bg-[#111111] border border-[#333] rounded-lg p-3">
+          <div className="text-xs text-[#A0A0A0] uppercase tracking-wider mb-1">{prettyLabel(k)}</div>
+          <RenderValue value={v} depth={depth + 1} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function FormattedAIOutput({ text, blockerReport }: { text: string; blockerReport?: any }) {
   const parsed = tryParseJson(text);
 
@@ -38,9 +69,6 @@ export default function FormattedAIOutput({ text, blockerReport }: { text: strin
       </div>
     );
   }
-
-  const data = Array.isArray(parsed) ? { result: parsed } : parsed;
-  const keys = Object.keys(data);
 
   return (
     <div className="space-y-4">
@@ -69,27 +97,8 @@ export default function FormattedAIOutput({ text, blockerReport }: { text: strin
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {keys.map((k) => {
-          const value = data[k];
-          const primitive = isPrimitive(value);
-
-          return (
-            <div key={k} className="bg-[#1A1A1A] border border-[#333] rounded-xl p-4">
-              <div className="text-xs text-[#A0A0A0] uppercase tracking-wider mb-2">{prettyLabel(k)}</div>
-              {primitive ? (
-                <div className="text-white whitespace-pre-wrap">{String(value)}</div>
-              ) : (
-                <details>
-                  <summary className="cursor-pointer text-[#00F5FF] text-sm">Expand section</summary>
-                  <pre className="mt-3 bg-[#111111] border border-[#333] rounded-lg p-3 text-xs overflow-auto whitespace-pre-wrap text-[#D4D4D4]">
-                    {JSON.stringify(value, null, 2)}
-                  </pre>
-                </details>
-              )}
-            </div>
-          );
-        })}
+      <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-4">
+        <RenderValue value={parsed} />
       </div>
     </div>
   );

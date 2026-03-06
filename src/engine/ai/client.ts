@@ -14,16 +14,6 @@ const MODULE_CONFIG: Record<string, any> = {
   copy_generator:    { maxTokens: 1500, temp: 0.7, stream: false },
 };
 
-function getRuntimeAIConfig(passedApiKey?: string, passedModel?: string) {
-  const browserApiKey = typeof window !== 'undefined' ? localStorage.getItem('ion_api_key') : '';
-  const browserModel = typeof window !== 'undefined' ? localStorage.getItem('ion_ai_model') : '';
-
-  return {
-    apiKey: passedApiKey || browserApiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    model: passedModel || browserModel || process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash',
-  };
-}
-
 function parseGeminiError(err: any) {
   const rawMessage = err?.message || 'Unknown error';
   let parsed: any = null;
@@ -51,6 +41,16 @@ function parseGeminiError(err: any) {
     return { message: friendly, details: message, code, status, retryDelay };
   }
 
+  if (status === 'UNAUTHENTICATED' || code === 401 || lowerMessage.includes('api key')) {
+    return {
+      message: 'Authentication failed. Please verify API key and model access permissions.',
+      details: message,
+      code,
+      status,
+      retryDelay,
+    };
+  }
+
   return { message, details: message, code, status, retryDelay };
 }
 
@@ -59,22 +59,23 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages, api
   const startTime = Date.now();
 
   try {
-    const runtime = getRuntimeAIConfig(apiKey, model);
+    const runtimeApiKey = apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const runtimeModel = model || process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
 
-    if (!runtime.apiKey) {
+    if (!runtimeApiKey) {
       throw new Error('Missing Gemini API key. Open AI Settings and add your key.');
     }
 
-    const ai = new GoogleGenAI({ apiKey: runtime.apiKey });
+    const ai = new GoogleGenAI({ apiKey: runtimeApiKey });
 
-    const fullSystemInstruction = systemPrompt + '\n\n' + modulePrompt;
+    const fullSystemInstruction = `${systemPrompt}\n\n${modulePrompt}`;
     const contents = messages.map((m: any) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
 
     const response = await ai.models.generateContent({
-      model: runtime.model,
+      model: runtimeModel,
       contents,
       config: {
         systemInstruction: fullSystemInstruction,

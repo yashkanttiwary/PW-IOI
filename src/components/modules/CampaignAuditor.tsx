@@ -7,14 +7,21 @@ import ReactMarkdown from 'react-markdown';
 export default function CampaignAuditor() {
   const { state, dispatch } = useAppStore();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [planText, setPlanText] = useState('');
   const [report, setReport] = useState<any>(null);
 
   const handleAudit = async () => {
     if (!planText) return;
     setLoading(true);
-    const res = await orchestrateAudit(planText, state, dispatch);
-    setReport(res);
+    const res: any = await orchestrateAudit(planText, state, dispatch);
+    if (res?.success === false) {
+      setError(res.error || 'Failed to run audit.');
+      setReport(null);
+    } else {
+      setError('');
+      setReport(res);
+    }
     setLoading(false);
   };
 
@@ -26,6 +33,12 @@ export default function CampaignAuditor() {
           Campaign Auditor
         </h1>
       </div>
+
+      {error && (
+        <div className="mb-6 text-sm text-[#FF9100] bg-[#FF9100]/10 border border-[#FF9100]/30 rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 h-fit">

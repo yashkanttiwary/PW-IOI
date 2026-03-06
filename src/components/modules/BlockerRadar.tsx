@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { runBlockerScan } from '../../engine/blocker/blockerDetector';
 import { ShieldAlert, AlertTriangle, XCircle, CheckCircle2 } from 'lucide-react';
+import { STATE_OPTIONS } from '../../engine/constants/stateMapping';
 
 export default function BlockerRadar() {
-  const { state } = useAppStore();
+  const { state, dispatch } = useAppStore();
   const [planText, setPlanText] = useState('');
   const [targetDate, setTargetDate] = useState(new Date().toISOString().split('T')[0]);
-  const [targetState, setTargetState] = useState('Delhi');
+  const [targetState, setTargetState] = useState('Delhi-NCR');
   const [report, setReport] = useState<any>(null);
 
   const handleScan = () => {
@@ -17,6 +18,7 @@ export default function BlockerRadar() {
       targetState,
     });
     setReport(res);
+    dispatch({ type: 'SAVE_BLOCKER_SCAN', payload: { report: res, label: 'blocker_radar', createdAt: new Date().toISOString() } });
   };
 
   const getStatusIcon = (status: string) => {
@@ -40,7 +42,7 @@ export default function BlockerRadar() {
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-[#A0A0A0] mb-1">Target Date</label>
+              <label htmlFor="target-date" className="block text-sm text-[#A0A0A0] mb-1">Target Date</label>
               <input 
                 type="date" 
                 value={targetDate}
@@ -50,22 +52,20 @@ export default function BlockerRadar() {
             </div>
 
             <div>
-              <label className="block text-sm text-[#A0A0A0] mb-1">Target State</label>
+              <label htmlFor="target-state" className="block text-sm text-[#A0A0A0] mb-1">Target State</label>
               <select 
                 value={targetState}
                 onChange={(e) => setTargetState(e.target.value)}
                 className="w-full bg-[#111111] border border-[#333] rounded-lg px-4 py-2 text-white"
               >
-                <option value="Delhi">Delhi NCR</option>
-                <option value="UP">Uttar Pradesh</option>
-                <option value="Maharashtra">Maharashtra</option>
-                <option value="Karnataka">Karnataka</option>
-                <option value="Bihar">Bihar</option>
+                {STATE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </div>
             
             <div>
-              <label className="block text-sm text-[#A0A0A0] mb-1">Plan / Copy Text</label>
+              <label htmlFor="plan-text" className="block text-sm text-[#A0A0A0] mb-1">Plan / Copy Text</label>
               <textarea 
                 value={planText}
                 onChange={(e) => setPlanText(e.target.value)}

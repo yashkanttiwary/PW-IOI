@@ -11,24 +11,35 @@ export async function runAutoAudit(planText: string, auditContext: any = {}) {
       startDate: auditContext.startDate || new Date(),
       targetState: auditContext.targetState || null,
     }),
-    hasDataCapture: /qr|lead\\s+capture|sign\\s*up|register|form|playbook|vip\\s+pass/i.test(planText),
-    hasDualAudience: /student\\s+hook|parent\\s+close|\\[student\\]|\\[parent\\]/i.test(planText),
+    hasDataCapture: /qr|lead\s+capture|sign\s*up|register|form|playbook|vip\s+pass/i.test(planText),
+    hasDualAudience: /student\s+hook|parent\s+close|\[student\]|\[parent\]/i.test(planText),
     hasFunnelRef: /tofu|mofu|bofu|views.*signup|signup.*app|app.*cee|funnel/i.test(planText),
   };
 
   const aiResult = await callAI({
     module: 'auto_audit',
+    apiKey: auditContext.aiConfig?.apiKey,
+    model: auditContext.aiConfig?.model,
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('auto_audit'),
-    messages: [{ role: 'user', content: `Audit this plan:\\n\\n${planText.slice(0, 3000)}` }],
+    messages: [{ role: 'user', content: `Audit this plan:\n\n${planText.slice(0, 3000)}` }],
   });
+
+  if (!aiResult.success) {
+    return {
+      ...clientChecks,
+      aiScores: null,
+      bar: `AUTO-AUDIT FAILED: ${aiResult.error}`,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   const parsed = parseAIResponse(aiResult.text, 'audit_line');
 
   return {
     ...clientChecks,
     aiScores: parsed.success ? parsed.data : null,
-    bar: aiResult.text, 
+    bar: aiResult.text,
     timestamp: new Date().toISOString(),
   };
 }

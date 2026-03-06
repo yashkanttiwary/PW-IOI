@@ -10,6 +10,14 @@ import { STATE_PROFILES } from './constants/stateProfiles';
 import { parseAIResponse } from './ai/responseParser';
 import { PERSONA_STORE } from './persona/personaStore';
 import { compareVariants } from './abTest/scorer';
+import { normalizeStateKey } from './constants/stateMapping';
+
+function getAIArgs(appState: any) {
+  return {
+    apiKey: appState?.aiConfig?.apiKey,
+    model: appState?.aiConfig?.model,
+  };
+}
 
 export async function orchestrateFunnelCommand(mode: string, userInput: any, appState: any, dispatch: any) {
   let funnelData: any;
@@ -58,6 +66,7 @@ export async function orchestrateFunnelCommand(mode: string, userInput: any, app
 
   const ctx = buildContext('funnel_command', appState, userInput);
   const aiResult = await callAI({
+    ...getAIArgs(appState),
     module: 'funnel_command',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('funnel_command', {
@@ -68,6 +77,13 @@ export async function orchestrateFunnelCommand(mode: string, userInput: any, app
     }),
     messages: [{ role: 'user', content: userInput.brief || `Generate a ${mode} funnel projection for ${userInput.targetAdmissions || userInput.tofuVolume} with budget ₹${userInput.budget?.toLocaleString('en-IN') || 'TBD'}` }],
   });
+
+  if (!aiResult.success) {
+    dispatch({ type: 'SET_AI_ERROR', payload: aiResult.error });
+    return { success: false, error: aiResult.error };
+  }
+
+  dispatch({ type: 'SET_AI_ERROR', payload: null });
 
   const result = {
     mode,
@@ -86,6 +102,7 @@ export async function orchestrateFunnelCommand(mode: string, userInput: any, app
   runAutoAudit(aiResult.text, {
     blockerReport: ctx.blockerReport,
     startDate: userInput.targetDate ? new Date(userInput.targetDate) : new Date(),
+    aiConfig: appState.aiConfig,
   }).then(audit => dispatch({ type: 'SET_AUTO_AUDIT', payload: audit }));
 
   return result;
@@ -95,7 +112,7 @@ export async function orchestrateEventBuilder(userInput: any, appState: any, dis
   const blockerReport = runBlockerScan({
     planText: userInput.brief || '',
     startDate: new Date(userInput.targetDate),
-    targetState: userInput.campus, 
+    targetState: normalizeStateKey(userInput.campus), 
   });
 
   const eventFunnel = projectFunnelForward({
@@ -112,6 +129,7 @@ export async function orchestrateEventBuilder(userInput: any, appState: any, dis
   });
 
   const aiResult = await callAI({
+    ...getAIArgs(appState),
     module: 'event_builder',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('event_builder', {
@@ -122,6 +140,13 @@ export async function orchestrateEventBuilder(userInput: any, appState: any, dis
     }),
     messages: [{ role: 'user', content: `Plan this event:\n\nType: ${userInput.eventType}\nCampus: ${userInput.campus}\nDate: ${userInput.targetDate}\nBudget: ₹${userInput.budget?.toLocaleString('en-IN') || 'TBD'}\nFootfall Target: ${userInput.footfallTarget || 'TBD'}\nAudience: ${userInput.audience || 'Both'}\n\nBrief: ${userInput.brief || 'No brief provided — generate comprehensive plan.'}` }],
   });
+
+  if (!aiResult.success) {
+    dispatch({ type: 'SET_AI_ERROR', payload: aiResult.error });
+    return { success: false, error: aiResult.error };
+  }
+
+  dispatch({ type: 'SET_AI_ERROR', payload: null });
 
   const result = {
     type: 'event',
@@ -139,7 +164,7 @@ export async function orchestrateEventBuilder(userInput: any, appState: any, dis
   dispatch({ type: 'SET_CURRENT_PLAN', payload: result });
   dispatch({ type: 'SAVE_PLAN', payload: result });
 
-  runAutoAudit(aiResult.text, { blockerReport }).then(
+  runAutoAudit(aiResult.text, { blockerReport, aiConfig: appState.aiConfig }).then(
     audit => dispatch({ type: 'SET_AUTO_AUDIT', payload: audit })
   );
 
@@ -159,8 +184,10 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
         scenario: userInput.scenario || 'realistic',
       });
 
-  const stateMix = userInput.states?.[0] && STATE_PROFILES[userInput.states[0]]
-    ? STATE_PROFILES[userInput.states[0]].channelMix
+  const primaryState = normalizeStateKey(userInput.states?.[0]);
+
+  const stateMix = primaryState && STATE_PROFILES[primaryState]
+    ? STATE_PROFILES[primaryState].channelMix
     : { instagram: 0.25, youtube: 0.25, whatsapp: 0.20, offline: 0.20, meta_ads: 0.10 };
 
   const budgetAlloc = userInput.budget
@@ -179,13 +206,17 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
   const blockerReport = runBlockerScan({
     planText: userInput.brief || '',
     startDate: userInput.startDate ? new Date(userInput.startDate) : new Date(),
-    targetState: userInput.states?.[0] || null,
+    targetState: primaryState || null,
   });
 
-  const stateIntel = (userInput.states || []).map((s: string) => ({
-    state: s,
-    profile: STATE_PROFILES[s] || null,
-  })).filter((s: any) => s.profile);
+  const stateIntel = (userInput.states || []).map((s: string) => {
+    const normalized = normalizeStateKey(s);
+
+    return {
+      state: normalized,
+      profile: normalized ? STATE_PROFILES[normalized] || null : null,
+    };
+  }).filter((s: any) => s.profile);
 
   const ctx = buildContext('campaign_architect', appState, {
     ...userInput,
@@ -193,6 +224,7 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
   });
 
   const aiResult = await callAI({
+    ...getAIArgs(appState),
     module: 'campaign_architect',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('campaign_architect', {
@@ -204,6 +236,13 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
     }),
     messages: [{ role: 'user', content: `Build a campaign:\n\nGoal: ${userInput.goal}\nStates: ${userInput.states?.join(', ')}\nBudget: ₹${userInput.budget?.toLocaleString('en-IN') || 'TBD'}\nTimeline: ${userInput.timeline || 'TBD'} weeks\nAdmission Target: ${userInput.targetAdmissions || 'TBD'}\n\nBrief: ${userInput.brief || 'Generate comprehensive plan.'}` }],
   });
+
+  if (!aiResult.success) {
+    dispatch({ type: 'SET_AI_ERROR', payload: aiResult.error });
+    return { success: false, error: aiResult.error };
+  }
+
+  dispatch({ type: 'SET_AI_ERROR', payload: null });
 
   const result = {
     type: 'campaign',
@@ -221,7 +260,7 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
   dispatch({ type: 'SET_CURRENT_PLAN', payload: result });
   dispatch({ type: 'SAVE_PLAN', payload: result });
 
-  runAutoAudit(aiResult.text, { blockerReport }).then(
+  runAutoAudit(aiResult.text, { blockerReport, aiConfig: appState.aiConfig }).then(
     audit => dispatch({ type: 'SET_AUTO_AUDIT', payload: audit })
   );
 
@@ -240,11 +279,19 @@ export async function orchestratePersonaSimulation(userInput: any, appState: any
   });
 
   const aiResult = await callAI({
+    ...getAIArgs(appState),
     module: 'persona_simulate',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('persona_simulate', { ...ctx, personas: selected }),
     messages: [{ role: 'user', content: `React to this material:\n\n${userInput.material}` }],
   });
+
+  if (!aiResult.success) {
+    dispatch({ type: 'SET_AI_ERROR', payload: aiResult.error });
+    return { success: false, error: aiResult.error };
+  }
+
+  dispatch({ type: 'SET_AI_ERROR', payload: null });
 
   const parsed = parseAIResponse(aiResult.text, 'json');
   return { success: parsed.success, personas: selected, reactions: parsed.data };
@@ -254,11 +301,19 @@ export async function orchestrateABTest(userInput: any, appState: any, dispatch:
   const ctx = buildContext('ab_test', appState, userInput);
 
   const aiResult = await callAI({
+    ...getAIArgs(appState),
     module: 'ab_test',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('ab_test', ctx),
     messages: [{ role: 'user', content: `Score these variants:\n\nVARIANT A:\n${userInput.variantA}\n\nVARIANT B:\n${userInput.variantB}${userInput.variantC ? `\n\nVARIANT C:\n${userInput.variantC}` : ''}\n\nGoal: ${userInput.goal}\nTarget: ${userInput.targetPersona || 'All personas'}` }],
   });
+
+  if (!aiResult.success) {
+    dispatch({ type: 'SET_AI_ERROR', payload: aiResult.error });
+    return { success: false, error: aiResult.error };
+  }
+
+  dispatch({ type: 'SET_AI_ERROR', payload: null });
 
   const parsed = parseAIResponse(aiResult.text, 'json');
 
@@ -303,11 +358,19 @@ export async function orchestrateAudit(planText: string, appState: any, dispatch
   const ctx = buildContext('campaign_auditor', appState, { brief: planText });
 
   const aiResult = await callAI({
+    ...getAIArgs(appState),
     module: 'campaign_auditor',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('campaign_auditor', ctx),
     messages: [{ role: 'user', content: `Audit this:\n\n${planText}` }],
   });
+
+  if (!aiResult.success) {
+    dispatch({ type: 'SET_AI_ERROR', payload: aiResult.error });
+    return { success: false, error: aiResult.error };
+  }
+
+  dispatch({ type: 'SET_AI_ERROR', payload: null });
 
   const parsed = parseAIResponse(aiResult.text, 'json');
 

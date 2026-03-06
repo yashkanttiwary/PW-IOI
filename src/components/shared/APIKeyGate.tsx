@@ -11,6 +11,7 @@ export default function APIKeyGate() {
   const [error, setError] = useState('');
   const [testing, setTesting] = useState(false);
   const [testStatus, setTestStatus] = useState('');
+  const [isValidated, setIsValidated] = useState(false);
 
   const saveConfig = () => {
     const trimmed = apiKey.trim();
@@ -20,10 +21,16 @@ export default function APIKeyGate() {
       return;
     }
 
+    if (!isValidated) {
+      setError('Please run Test AI Connection first so we can verify your key/model.');
+      return;
+    }
+
     dispatch({
       type: 'SET_AI_CONFIG',
       payload: { apiKey: trimmed, model: model.trim() || 'gemini-2.5-flash' },
     });
+    dispatch({ type: 'SET_AI_ERROR', payload: null });
     dispatch({ type: 'CLOSE_AI_GATE' });
     setError('');
   };
@@ -37,6 +44,7 @@ export default function APIKeyGate() {
 
     setTesting(true);
     setError('');
+    setIsValidated(false);
     setTestStatus('Testing AI connection...');
 
     const result = await callAI({
@@ -48,13 +56,14 @@ export default function APIKeyGate() {
       messages: [{ role: 'user', content: 'Respond with CONNECTION_OK' }],
     });
 
-    if (result.success && result.text?.toUpperCase().includes('CONNECTION_OK')) {
+    if (result.success) {
+      setIsValidated(true);
       setTestStatus('✅ Connection successful. You can save and continue.');
-    } else if (result.success) {
-      setTestStatus('✅ API call worked. Save and continue.');
+      dispatch({ type: 'SET_AI_ERROR', payload: null });
     } else {
       setTestStatus('');
       setError(result.error || 'Connection failed. Please verify your key and model.');
+      dispatch({ type: 'SET_AI_ERROR', payload: result.error || 'Connection failed.' });
     }
 
     setTesting(false);
@@ -74,21 +83,29 @@ export default function APIKeyGate() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-[#A0A0A0] mb-2">Gemini API Key</label>
+              <label className="block text-sm text-[#A0A0A0] mb-2" htmlFor="gemini-key">Gemini API Key</label>
               <input
+                id="gemini-key"
                 type="password"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  setIsValidated(false);
+                }}
                 placeholder="AIza..."
                 className="w-full bg-[#0D0D0D] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#00F5FF] outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-[#A0A0A0] mb-2">Model</label>
+              <label className="block text-sm text-[#A0A0A0] mb-2" htmlFor="gemini-model">Model</label>
               <input
+                id="gemini-model"
                 value={model}
-                onChange={(e) => setModel(e.target.value)}
+                onChange={(e) => {
+                  setModel(e.target.value);
+                  setIsValidated(false);
+                }}
                 placeholder="gemini-2.5-flash"
                 className="w-full bg-[#0D0D0D] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#00F5FF] outline-none"
               />
@@ -97,7 +114,10 @@ export default function APIKeyGate() {
                 {['gemini-2.5-flash', 'gemini-2.5-pro'].map((m) => (
                   <button
                     key={m}
-                    onClick={() => setModel(m)}
+                    onClick={() => {
+                      setModel(m);
+                      setIsValidated(false);
+                    }}
                     type="button"
                     className={`px-2.5 py-1 text-xs rounded border ${model === m ? 'border-[#00F5FF] text-[#00F5FF]' : 'border-[#333] text-[#A0A0A0]'}`}
                   >
@@ -162,7 +182,7 @@ export default function APIKeyGate() {
 
           <div className="mt-8 p-4 rounded-lg bg-[#0D0D0D] border border-[#333] text-sm text-[#A0A0A0]">
             <div className="text-white font-semibold mb-2">Security note</div>
-            Your key is stored in your browser local storage for this app session and device.
+            Your API key is kept in current app memory only and is not persisted to browser storage.
           </div>
         </div>
       </div>

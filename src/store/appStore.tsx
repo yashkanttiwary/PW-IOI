@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { getCalendarPhase } from '../engine/calendar/calendarEngine';
 
-const AI_KEY_STORAGE = 'ion_api_key';
 const AI_MODEL_STORAGE = 'ion_ai_model';
 
 export const INITIAL_STATE = {
@@ -24,6 +23,8 @@ export const INITIAL_STATE = {
   ui: {
     showApiGate: true,
   },
+  aiError: null,
+  blockerScans: [],
   savedPersonas: [],
   savedPlans: [],
   auditHistory: [],
@@ -62,6 +63,9 @@ export function appReducer(state: any, action: any) {
         },
       };
 
+    case 'SET_AI_ERROR':
+      return { ...state, aiError: action.payload };
+
     case 'OPEN_AI_GATE':
       return {
         ...state,
@@ -72,6 +76,12 @@ export function appReducer(state: any, action: any) {
       return {
         ...state,
         ui: { ...state.ui, showApiGate: false },
+      };
+
+    case 'SAVE_BLOCKER_SCAN':
+      return {
+        ...state,
+        blockerScans: [action.payload, ...state.blockerScans].slice(0, 20),
       };
 
     case 'SET_SEMESTER_TARGET':
@@ -155,21 +165,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     dispatch({ type: 'SET_CALENDAR_PHASE', payload: getCalendarPhase() });
 
-    const savedKey = localStorage.getItem(AI_KEY_STORAGE) || '';
     const savedModel = localStorage.getItem(AI_MODEL_STORAGE) || 'gemini-2.5-flash';
-
-    if (savedKey) {
-      dispatch({ type: 'SET_AI_CONFIG', payload: { apiKey: savedKey, model: savedModel } });
-      dispatch({ type: 'CLOSE_AI_GATE' });
-    }
+    dispatch({ type: 'SET_AI_CONFIG', payload: { apiKey: '', model: savedModel } });
   }, []);
 
   useEffect(() => {
-    if (state.aiConfig?.isConfigured) {
-      localStorage.setItem(AI_KEY_STORAGE, state.aiConfig.apiKey);
-      localStorage.setItem(AI_MODEL_STORAGE, state.aiConfig.model || 'gemini-2.5-flash');
-    }
-  }, [state.aiConfig]);
+    localStorage.setItem(AI_MODEL_STORAGE, state.aiConfig.model || 'gemini-2.5-flash');
+  }, [state.aiConfig.model]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

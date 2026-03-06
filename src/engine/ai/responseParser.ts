@@ -1,14 +1,53 @@
+function extractFirstJsonObject(text: string) {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (ch === '\\') {
+      escaped = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (ch === '{') depth += 1;
+    if (ch === '}') depth -= 1;
+
+    if (depth === 0) {
+      return text.slice(start, i + 1);
+    }
+  }
+
+  return null;
+}
+
 export function parseAIResponse(rawText: string, expectedFormat: string) {
   if (expectedFormat === 'json') {
     try {
       const cleaned = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
       return { success: true, data: JSON.parse(cleaned) };
-    } catch (e) {
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
+    } catch {
+      const candidate = extractFirstJsonObject(rawText);
+      if (candidate) {
         try {
-          return { success: true, data: JSON.parse(jsonMatch[0]) };
-        } catch (e2) {
+          return { success: true, data: JSON.parse(candidate) };
+        } catch {
           return { success: false, error: 'Failed to parse JSON', raw: rawText };
         }
       }

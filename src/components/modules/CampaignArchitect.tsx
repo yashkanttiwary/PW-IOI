@@ -3,14 +3,16 @@ import { useAppStore } from '../../store/appStore';
 import { orchestrateCampaignArchitect } from '../../engine/orchestrators';
 import BoardSummaryCard from '../shared/BoardSummaryCard';
 import FormattedAIOutput from '../shared/FormattedAIOutput';
+import { STATE_OPTIONS } from '../../engine/constants/stateMapping';
 
 export default function CampaignArchitect() {
   const { state, dispatch } = useAppStore();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     goal: 'Lead Generation',
-    states: ['Delhi', 'UP'],
+    states: ['Delhi-NCR', 'Uttar Pradesh'],
     budget: 1000000,
     timeline: 4,
     targetAdmissions: 50,
@@ -24,7 +26,14 @@ export default function CampaignArchitect() {
 
   const handleGenerate = async () => {
     setLoading(true);
-    await orchestrateCampaignArchitect(formData, state, dispatch);
+    const result: any = await orchestrateCampaignArchitect(formData, state, dispatch);
+
+    if (result?.success === false) {
+      setError(result.error || 'Failed to generate campaign plan.');
+    } else {
+      setError('');
+    }
+
     setLoading(false);
   };
 
@@ -35,6 +44,12 @@ export default function CampaignArchitect() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">Campaign Architect</h1>
       </div>
+
+      {error && (
+        <div className="mb-6 text-sm text-[#FF9100] bg-[#FF9100]/10 border border-[#FF9100]/30 rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Input Form */}
@@ -64,14 +79,9 @@ export default function CampaignArchitect() {
                 onChange={handleStateChange}
                 className="w-full bg-[#111111] border border-[#333] rounded-lg px-4 py-2 text-white h-32"
               >
-                <option value="Delhi">Delhi NCR</option>
-                <option value="UP">Uttar Pradesh</option>
-                <option value="Maharashtra">Maharashtra</option>
-                <option value="Karnataka">Karnataka</option>
-                <option value="Bihar">Bihar</option>
-                <option value="Rajasthan">Rajasthan</option>
-                <option value="MP">Madhya Pradesh</option>
-              </select>
+                {STATE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}              </select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

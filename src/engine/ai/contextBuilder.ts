@@ -1,6 +1,7 @@
 import { getCalendarPhase } from '../calendar/calendarEngine';
 import { runBlockerScan } from '../blocker/blockerDetector';
 import { PERSONA_STORE } from '../persona/personaStore';
+import { normalizeStateKey } from '../constants/stateMapping';
 
 export function buildContext(moduleId: string, appState: any, userInput: any) {
   const ctx: any = {
@@ -15,7 +16,7 @@ export function buildContext(moduleId: string, appState: any, userInput: any) {
       planText: userInput.brief || '',
       startDate: new Date(dateToUse),
       endDate: userInput.endDate ? new Date(userInput.endDate) : null,
-      targetState: userInput.states?.[0] || userInput.campus || null,
+      targetState: normalizeStateKey(userInput.states?.[0] || userInput.campus || null),
     });
     ctx.blockers = [
       `A:${ctx.blockerReport.blockerA.status}`,

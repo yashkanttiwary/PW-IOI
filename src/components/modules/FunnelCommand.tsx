@@ -141,7 +141,7 @@ export default function FunnelCommand() {
               {plan.mode === 'compare' ? (
                 <div className="grid grid-cols-3 gap-4">
                   {['optimistic', 'realistic', 'conservative'].map(sc => (
-                    <div key={sc} className={`bg-[#1A1A1A] border \${sc === 'realistic' ? 'border-[#00F5FF]' : 'border-[#333]'} rounded-xl p-4`}>
+                    <div key={sc} className={`bg-[#1A1A1A] border ${sc === 'realistic' ? 'border-[#00F5FF]' : 'border-[#333]'} rounded-xl p-4`}>
                       <h3 className="text-center font-bold uppercase mb-4 text-[#A0A0A0]">{sc}</h3>
                       <div className="text-center mb-6">
                         <div className="text-3xl font-bold text-white">{formatNumber(plan.funnel[sc].totalAdmissions)}</div>

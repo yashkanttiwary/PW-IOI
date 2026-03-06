@@ -104,7 +104,7 @@ export default function BlockerRadar() {
               </div>
 
               {/* Blocker A */}
-              <div className={`bg-[#1A1A1A] border rounded-xl p-6 \${report.blockerA.status === '🚫' ? 'border-[#FF5252]' : report.blockerA.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
+              <div className={`bg-[#1A1A1A] border rounded-xl p-6 ${report.blockerA.status === '🚫' ? 'border-[#FF5252]' : report.blockerA.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
                 <div className="flex items-start gap-4">
                   {getStatusIcon(report.blockerA.status)}
                   <div className="flex-1">
@@ -127,11 +127,11 @@ export default function BlockerRadar() {
               </div>
 
               {/* Blocker B */}
-              <div className={`bg-[#1A1A1A] border rounded-xl p-6 \${report.blockerB.status === '🚫' ? 'border-[#FF5252]' : report.blockerB.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
+              <div className={`bg-[#1A1A1A] border rounded-xl p-6 ${report.blockerB.status === '🚫' ? 'border-[#FF5252]' : report.blockerB.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
                 <div className="flex items-start gap-4">
                   {getStatusIcon(report.blockerB.status)}
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white mb-2">Blocker B: "Loser College" Stigma</h3>
+                    <h3 className="text-lg font-bold text-white mb-2">Blocker B: &quot;Loser College&quot; Stigma</h3>
                     {report.blockerB.findings.length > 0 ? (
                       <ul className="list-disc pl-5 space-y-1 text-[#A0A0A0] mb-4">
                         {report.blockerB.findings.map((f: string, i: number) => <li key={i}>{f}</li>)}
@@ -150,7 +150,7 @@ export default function BlockerRadar() {
               </div>
 
               {/* Blocker C */}
-              <div className={`bg-[#1A1A1A] border rounded-xl p-6 \${report.blockerC.status === '🚫' ? 'border-[#FF5252]' : report.blockerC.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
+              <div className={`bg-[#1A1A1A] border rounded-xl p-6 ${report.blockerC.status === '🚫' ? 'border-[#FF5252]' : report.blockerC.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
                 <div className="flex items-start gap-4">
                   {getStatusIcon(report.blockerC.status)}
                   <div className="flex-1">

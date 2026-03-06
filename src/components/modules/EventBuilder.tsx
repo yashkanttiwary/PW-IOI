@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { orchestrateEventBuilder } from '../../engine/orchestrators';
 import BoardSummaryCard from '../shared/BoardSummaryCard';
-import ReactMarkdown from 'react-markdown';
+import FormattedAIOutput from '../shared/FormattedAIOutput';
 import { Calendar, Users, MapPin, IndianRupee } from 'lucide-react';
 
 export default function EventBuilder() {
@@ -144,9 +144,7 @@ export default function EventBuilder() {
             <>
               <BoardSummaryCard data={plan} />
               
-              <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 prose prose-invert max-w-none">
-                <ReactMarkdown>{plan.aiPlan}</ReactMarkdown>
-              </div>
+              <FormattedAIOutput text={plan.aiPlan} blockerReport={plan.blockerReport} />
             </>
           ) : (
             <div className="h-64 border border-[#333] border-dashed rounded-xl flex items-center justify-center text-[#A0A0A0]">

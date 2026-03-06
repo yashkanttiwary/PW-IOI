@@ -13,9 +13,15 @@ import ABTestStudio from './components/modules/ABTestStudio';
 import BlockerRadar from './components/modules/BlockerRadar';
 import CampaignAuditor from './components/modules/CampaignAuditor';
 import AutoAuditBar from './components/shared/AutoAuditBar';
+import APIKeyGate from './components/shared/APIKeyGate';
+import GlobalBlockerSummary from './components/shared/GlobalBlockerSummary';
 
 export default function App() {
   const { state } = useAppStore();
+
+  if (state.ui?.showApiGate || !state.aiConfig?.isConfigured) {
+    return <APIKeyGate />;
+  }
 
   const renderModule = () => {
     switch (state.currentModule) {
@@ -36,6 +42,7 @@ export default function App() {
       <Sidebar />
       <div className="flex-1 flex flex-col relative">
         <Header />
+        <GlobalBlockerSummary />
         <main className="flex-1 overflow-y-auto">
           {renderModule()}
         </main>

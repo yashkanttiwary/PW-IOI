@@ -39,7 +39,7 @@ export function calculateBudgetAllocation({ totalBudget, channelMix, funnelProje
       totalBudget,
       totalAdmissions: admissions,
       cac: admissions > 0 ? Math.round(totalBudget / admissions) : null,
-      cacLabel: admissions > 0 ? `₹${Math.round(totalBudget / admissions).toLocaleString('en-IN')}` : '🔴 N/A',
+      cacLabel: admissions > 0 ? `₹\${Math.round(totalBudget / admissions).toLocaleString('en-IN')}` : '🔴 N/A',
     },
   };
 
@@ -65,7 +65,7 @@ export function calculateCAC(budget: number, admissions: number) {
   const cac = Math.round(budget / admissions);
   return {
     cac,
-    formatted: `₹${cac.toLocaleString('en-IN')}`,
+    formatted: `₹\${cac.toLocaleString('en-IN')}`,
     isHealthy: cac <= 15000,
     status: cac <= 15000 ? '🟢' : cac <= 25000 ? '🟡' : '🔴',
   };

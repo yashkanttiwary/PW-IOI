@@ -3,35 +3,24 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { getCalendarPhase } from '../engine/calendar/calendarEngine';
 
-const AI_KEY_STORAGE = 'ion_api_key';
-const AI_MODEL_STORAGE = 'ion_ai_model';
-
 export const INITIAL_STATE = {
   currentModule: 'dashboard',
-  calendarPhase: null,
-  dateOverride: null,
+  calendarPhase: null, 
+  dateOverride: null,  
   semesterTarget: {
-    semester: null,
+    semester: null,     
     admissionGoal: null,
-    totalBudget: null,
+    totalBudget: null,  
     scenario: 'realistic',
   },
-  aiConfig: {
-    apiKey: '',
-    model: 'gemini-2.5-pro',
-    isConfigured: false,
-  },
-  ui: {
-    showApiGate: true,
-  },
-  savedPersonas: [],
-  savedPlans: [],
-  auditHistory: [],
-  abTests: [],
+  savedPersonas: [],    
+  savedPlans: [],       
+  auditHistory: [],     
+  abTests: [],          
   activeConversation: {
     module: null,
-    history: [],
-    currentPlan: null,
+    history: [],        
+    currentPlan: null,  
     lastAutoAudit: null,
   },
 };
@@ -45,34 +34,12 @@ export function appReducer(state: any, action: any) {
         activeConversation: {
           ...state.activeConversation,
           module: action.payload,
-          history: [],
+          history: [], 
         },
       };
 
     case 'SET_CALENDAR_PHASE':
       return { ...state, calendarPhase: action.payload };
-
-    case 'SET_AI_CONFIG':
-      return {
-        ...state,
-        aiConfig: {
-          apiKey: action.payload.apiKey,
-          model: action.payload.model || 'gemini-2.5-pro',
-          isConfigured: Boolean(action.payload.apiKey),
-        },
-      };
-
-    case 'OPEN_AI_GATE':
-      return {
-        ...state,
-        ui: { ...state.ui, showApiGate: true },
-      };
-
-    case 'CLOSE_AI_GATE':
-      return {
-        ...state,
-        ui: { ...state.ui, showApiGate: false },
-      };
 
     case 'SET_SEMESTER_TARGET':
       return { ...state, semesterTarget: { ...state.semesterTarget, ...action.payload } };
@@ -101,11 +68,11 @@ export function appReducer(state: any, action: any) {
         savedPlans: [
           {
             ...action.payload,
-            id: `plan_${Date.now()}`,
+            id: `plan_\${Date.now()}`,
             savedAt: new Date().toISOString(),
           },
           ...state.savedPlans,
-        ].slice(0, 50),
+        ].slice(0, 50), 
       };
 
     case 'SAVE_PERSONA':
@@ -114,11 +81,11 @@ export function appReducer(state: any, action: any) {
         savedPersonas: [
           {
             ...action.payload,
-            id: `custom_${Date.now()}`,
+            id: `custom_\${Date.now()}`,
             createdAt: new Date().toISOString(),
           },
           ...state.savedPersonas,
-        ].slice(0, 20),
+        ].slice(0, 20), 
       };
 
     case 'SAVE_AUDIT':
@@ -154,22 +121,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     dispatch({ type: 'SET_CALENDAR_PHASE', payload: getCalendarPhase() });
-
-    const savedKey = localStorage.getItem(AI_KEY_STORAGE) || '';
-    const savedModel = localStorage.getItem(AI_MODEL_STORAGE) || 'gemini-2.5-pro';
-
-    if (savedKey) {
-      dispatch({ type: 'SET_AI_CONFIG', payload: { apiKey: savedKey, model: savedModel } });
-      dispatch({ type: 'CLOSE_AI_GATE' });
-    }
   }, []);
-
-  useEffect(() => {
-    if (state.aiConfig?.isConfigured) {
-      localStorage.setItem(AI_KEY_STORAGE, state.aiConfig.apiKey);
-      localStorage.setItem(AI_MODEL_STORAGE, state.aiConfig.model || 'gemini-2.5-pro');
-    }
-  }, [state.aiConfig]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

@@ -43,7 +43,7 @@ export default function PersonaLab() {
                 <div 
                   key={p.id}
                   onClick={() => togglePersona(p.id)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`p-3 rounded-lg border cursor-pointer transition-colors \${
                     selectedPersonas.includes(p.id) 
                       ? 'bg-[#1A4FBF]/20 border-[#1A4FBF]' 
                       : 'bg-[#111111] border-[#333] hover:border-[#555]'
@@ -51,7 +51,7 @@ export default function PersonaLab() {
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-white">{p.name}</span>
-                    <span className={`text-xs px-2 py-1 rounded ${p.type === 'student' ? 'bg-[#7C4DFF]/20 text-[#7C4DFF]' : 'bg-[#FF9100]/20 text-[#FF9100]'}`}>
+                    <span className={`text-xs px-2 py-1 rounded \${p.type === 'student' ? 'bg-[#7C4DFF]/20 text-[#7C4DFF]' : 'bg-[#FF9100]/20 text-[#FF9100]'}`}>
                       {p.type.toUpperCase()}
                     </span>
                   </div>
@@ -91,13 +91,13 @@ export default function PersonaLab() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-[#111111] p-4 rounded-lg border border-[#333]">
                     <div className="text-xs text-[#A0A0A0] mb-1">Student Resonance</div>
-                    <div className={`text-2xl font-bold ${results.reactions.studentResonance >= 7 ? 'text-[#00E676]' : results.reactions.studentResonance >= 5 ? 'text-[#FFD600]' : 'text-[#FF5252]'}`}>
+                    <div className={`text-2xl font-bold \${results.reactions.studentResonance >= 7 ? 'text-[#00E676]' : results.reactions.studentResonance >= 5 ? 'text-[#FFD600]' : 'text-[#FF5252]'}`}>
                       {results.reactions.studentResonance}/10
                     </div>
                   </div>
                   <div className="bg-[#111111] p-4 rounded-lg border border-[#333]">
                     <div className="text-xs text-[#A0A0A0] mb-1">Parent Resonance</div>
-                    <div className={`text-2xl font-bold ${results.reactions.parentResonance >= 7 ? 'text-[#00E676]' : results.reactions.parentResonance >= 5 ? 'text-[#FFD600]' : 'text-[#FF5252]'}`}>
+                    <div className={`text-2xl font-bold \${results.reactions.parentResonance >= 7 ? 'text-[#00E676]' : results.reactions.parentResonance >= 5 ? 'text-[#FFD600]' : 'text-[#FF5252]'}`}>
                       {results.reactions.parentResonance}/10
                     </div>
                   </div>
@@ -125,7 +125,7 @@ export default function PersonaLab() {
                     <div key={r.personaId} className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6">
                       <div className="flex justify-between items-center mb-4 border-b border-[#333] pb-4">
                         <h3 className="text-lg font-bold text-white">{r.personaName}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold \${
                           r.converts === 'YES' ? 'bg-[#00E676]/20 text-[#00E676]' : 
                           r.converts === 'MAYBE' ? 'bg-[#FFD600]/20 text-[#FFD600]' : 
                           'bg-[#FF5252]/20 text-[#FF5252]'

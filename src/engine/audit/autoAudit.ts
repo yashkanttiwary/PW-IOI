@@ -20,7 +20,7 @@ export async function runAutoAudit(planText: string, auditContext: any = {}) {
     module: 'auto_audit',
     systemPrompt: BRAND_SYSTEM_PROMPT,
     modulePrompt: getModulePrompt('auto_audit'),
-    messages: [{ role: 'user', content: `Audit this plan:\\n\\n${planText.slice(0, 3000)}` }],
+    messages: [{ role: 'user', content: `Audit this plan:\\n\\n\${planText.slice(0, 3000)}` }],
   });
 
   const parsed = parseAIResponse(aiResult.text, 'audit_line');

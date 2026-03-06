@@ -104,7 +104,7 @@ export default function BlockerRadar() {
               </div>
 
               {/* Blocker A */}
-              <div className={`bg-[#1A1A1A] border rounded-xl p-6 ${report.blockerA.status === '🚫' ? 'border-[#FF5252]' : report.blockerA.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
+              <div className={`bg-[#1A1A1A] border rounded-xl p-6 \${report.blockerA.status === '🚫' ? 'border-[#FF5252]' : report.blockerA.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
                 <div className="flex items-start gap-4">
                   {getStatusIcon(report.blockerA.status)}
                   <div className="flex-1">
@@ -127,7 +127,7 @@ export default function BlockerRadar() {
               </div>
 
               {/* Blocker B */}
-              <div className={`bg-[#1A1A1A] border rounded-xl p-6 ${report.blockerB.status === '🚫' ? 'border-[#FF5252]' : report.blockerB.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
+              <div className={`bg-[#1A1A1A] border rounded-xl p-6 \${report.blockerB.status === '🚫' ? 'border-[#FF5252]' : report.blockerB.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
                 <div className="flex items-start gap-4">
                   {getStatusIcon(report.blockerB.status)}
                   <div className="flex-1">
@@ -150,7 +150,7 @@ export default function BlockerRadar() {
               </div>
 
               {/* Blocker C */}
-              <div className={`bg-[#1A1A1A] border rounded-xl p-6 ${report.blockerC.status === '🚫' ? 'border-[#FF5252]' : report.blockerC.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
+              <div className={`bg-[#1A1A1A] border rounded-xl p-6 \${report.blockerC.status === '🚫' ? 'border-[#FF5252]' : report.blockerC.status === '⚠️' ? 'border-[#FFD600]' : 'border-[#333]'}`}>
                 <div className="flex items-start gap-4">
                   {getStatusIcon(report.blockerC.status)}
                   <div className="flex-1">

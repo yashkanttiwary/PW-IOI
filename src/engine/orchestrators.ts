@@ -167,13 +167,13 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
     ? calculateBudgetAllocation({
         totalBudget: userInput.budget,
         channelMix: stateMix,
-        funnelProjection: campaignFunnel.stages
+        funnelProjection: ('stages' in campaignFunnel)
           ? campaignFunnel
-          : projectFunnelForward({ tofuVolume: campaignFunnel.required?.views || 50000 }),
+          : projectFunnelForward({ tofuVolume: (campaignFunnel as any).required?.views || 50000 }),
       })
     : null;
 
-  const admissions = campaignFunnel.totalAdmissions || userInput.targetAdmissions;
+  const admissions = ('totalAdmissions' in campaignFunnel) ? (campaignFunnel as any).totalAdmissions : userInput.targetAdmissions;
   const cacData = calculateCAC(userInput.budget || 0, admissions);
 
   const blockerReport = runBlockerScan({

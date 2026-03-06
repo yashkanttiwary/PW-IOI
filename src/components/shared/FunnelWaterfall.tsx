@@ -37,7 +37,7 @@ export default function FunnelWaterfall({ stages }: { stages: any[] }) {
                 <div className="flex-1 flex items-center">
                   <div 
                     className="h-8 rounded-r-md transition-all duration-500"
-                    style={{ width: `${width}%`, backgroundColor: color }}
+                    style={{ width: `\${width}%`, backgroundColor: color }}
                   ></div>
                   <div className="ml-4 font-mono font-bold text-white">
                     {formatNumber(stage.volume)}

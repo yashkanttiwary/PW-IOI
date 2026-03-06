@@ -1,13 +1,6 @@
 import { CONVERSION_BENCHMARKS } from '../constants/benchmarks';
 
-type FunnelStage = {
-  id: string;
-  volume: number | null;
-  rate: number | null;
-  dropoff: number | null;
-};
-
-export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario = 'realistic', overrides = {} }: any): any {
+export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario = 'realistic', overrides = {} }: any) {
   const b = CONVERSION_BENCHMARKS as any;
   const getRate = (stage: string) => {
     if (overrides[stage]) return overrides[stage];
@@ -20,35 +13,30 @@ export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario
       ? getRate('views_to_signup')
       : (getRate('views_to_signup') + getRate('footfall_to_signup')) / 2;
 
-  const stages: FunnelStage[] = [
-    { id: 'views',     volume: tofuVolume, rate: null,                        dropoff: null },
-    { id: 'signup',    volume: null,       rate: firstRate,                   dropoff: null },
-    { id: 'app',       volume: null,       rate: getRate('signup_to_app'),    dropoff: null },
-    { id: 'cee',       volume: null,       rate: getRate('app_to_cee'),       dropoff: null },
-    { id: 'interview', volume: null,       rate: getRate('cee_to_interview'), dropoff: null },
-    { id: 'admission', volume: null,       rate: getRate('interview_to_admission'), dropoff: null },
+  const stages = [
+    { id: 'views',     volume: tofuVolume, rate: 0,                        dropoff: 0 },
+    { id: 'signup',    volume: 0,          rate: firstRate,                dropoff: 0 },
+    { id: 'app',       volume: 0,          rate: getRate('signup_to_app'),    dropoff: 0 },
+    { id: 'cee',       volume: 0,          rate: getRate('app_to_cee'),       dropoff: 0 },
+    { id: 'interview', volume: 0,          rate: getRate('cee_to_interview'), dropoff: 0 },
+    { id: 'admission', volume: 0,          rate: getRate('interview_to_admission'), dropoff: 0 },
   ];
 
   for (let i = 1; i < stages.length; i++) {
-    const prevVolume = stages[i - 1].volume ?? 0;
-    const rate = stages[i].rate ?? 0;
-
-    stages[i].volume = Math.round(prevVolume * rate);
-    stages[i].dropoff = 1 - rate;
+    stages[i].volume = Math.round(stages[i - 1].volume * stages[i].rate);
+    stages[i].dropoff = 1 - stages[i].rate;
   }
-
-  const totalAdmissions = stages[stages.length - 1].volume ?? 0;
 
   return {
     scenario,
     channel,
     stages,
-    totalAdmissions,
-    overallConversionRate: totalAdmissions / tofuVolume,
+    totalAdmissions: stages[stages.length - 1].volume,
+    overallConversionRate: stages[stages.length - 1].volume / tofuVolume,
   };
 }
 
-export function projectFunnelReverse({ targetAdmissions, channel = 'blended', scenario = 'realistic', overrides = {} }: any): any {
+export function projectFunnelReverse({ targetAdmissions, channel = 'blended', scenario = 'realistic', overrides = {} }: any) {
   const b = CONVERSION_BENCHMARKS as any;
   const getRate = (stage: string) => overrides[stage] || b[stage][scenario].rate;
 

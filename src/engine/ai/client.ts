@@ -14,41 +14,29 @@ const MODULE_CONFIG: Record<string, any> = {
   copy_generator:    { maxTokens: 1500, temp: 0.7, stream: false },
 };
 
-function getRuntimeAIConfig(passedApiKey?: string, passedModel?: string) {
-  const browserApiKey = typeof window !== 'undefined' ? localStorage.getItem('ion_api_key') : '';
-  const browserModel = typeof window !== 'undefined' ? localStorage.getItem('ion_ai_model') : '';
-
-  return {
-    apiKey: passedApiKey || browserApiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    model: passedModel || browserModel || process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-pro',
-  };
-}
-
-export async function callAI({ module, systemPrompt, modulePrompt, messages, apiKey, model }: any) {
+export async function callAI({ module, systemPrompt, modulePrompt, messages }: any) {
   const config = MODULE_CONFIG[module] || MODULE_CONFIG.dashboard;
   const startTime = Date.now();
 
   try {
-    const runtime = getRuntimeAIConfig(apiKey, model);
-
-    if (!runtime.apiKey) {
-      throw new Error('Missing Gemini API key. Open AI Settings and add your key.');
-    }
-
-    const ai = new GoogleGenAI({ apiKey: runtime.apiKey });
-
-    const fullSystemInstruction = systemPrompt + '\n\n' + modulePrompt;
+    const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
+    
+    // Combine system prompt and module prompt
+    const fullSystemInstruction = systemPrompt + '\\n\\n' + modulePrompt;
+    
+    // Format messages for Gemini
     const contents = messages.map((m: any) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
 
     const response = await ai.models.generateContent({
-      model: runtime.model,
-      contents,
+      model: 'gemini-2.5-flash',
+      contents: contents,
       config: {
         systemInstruction: fullSystemInstruction,
         temperature: config.temp,
+        // maxOutputTokens: config.maxTokens,
       }
     });
 
@@ -59,7 +47,7 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages, api
       latencyMs: Date.now() - startTime,
     };
   } catch (err: any) {
-    console.error(`ION AI call failed [${module}]:`, err);
+    console.error(`ION AI call failed [\${module}]:`, err);
     return {
       success: false,
       data: null,

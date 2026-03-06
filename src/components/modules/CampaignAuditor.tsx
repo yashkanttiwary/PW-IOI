@@ -87,8 +87,8 @@ export default function CampaignAuditor() {
                         <div className="flex items-center gap-2">
                           <div className="w-24 h-2 bg-[#111111] rounded-full overflow-hidden">
                             <div 
-                              className={`h-full ${d.score >= 8 ? 'bg-[#00E676]' : d.score >= 5 ? 'bg-[#FFD600]' : 'bg-[#FF5252]'}`} 
-                              style={{ width: `${(d.score / 10) * 100}%` }}
+                              className={`h-full \${d.score >= 8 ? 'bg-[#00E676]' : d.score >= 5 ? 'bg-[#FFD600]' : 'bg-[#FF5252]'}`} 
+                              style={{ width: `\${(d.score / 10) * 100}%` }}
                             ></div>
                           </div>
                           <span className="font-mono text-white w-8 text-right">{d.score}/10</span>

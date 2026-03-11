@@ -5,6 +5,8 @@ import BoardSummaryCard from '../shared/BoardSummaryCard';
 import FunnelWaterfall from '../shared/FunnelWaterfall';
 import { formatINR, formatNumber } from '../../utils/formatCurrency';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 
 export default function FunnelCommand() {
   const { state, dispatch } = useAppStore();
@@ -148,7 +150,7 @@ export default function FunnelCommand() {
                         <div className="text-xs text-[#A0A0A0]">Admissions</div>
                       </div>
                       <div className="space-y-2">
-                        {plan.funnel[sc].stages.map((st: any) => (
+                        {plan.funnel[sc].stages.map((st: { id: string; volume: number }) => (
                           <div key={st.id} className="flex justify-between text-sm">
                             <span className="text-[#A0A0A0] capitalize">{st.id}</span>
                             <span className="font-mono text-white">{formatNumber(st.volume)}</span>
@@ -197,7 +199,7 @@ export default function FunnelCommand() {
               )}
 
               <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 prose prose-invert max-w-none">
-                <ReactMarkdown>{plan.aiNarrative}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{plan.aiNarrative}</ReactMarkdown>
               </div>
             </>
           ) : (

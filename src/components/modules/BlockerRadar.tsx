@@ -8,7 +8,7 @@ export default function BlockerRadar() {
   const [planText, setPlanText] = useState('');
   const [targetDate, setTargetDate] = useState(new Date().toISOString().split('T')[0]);
   const [targetState, setTargetState] = useState('Delhi');
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<Record<string, any> | null>(null);
 
   const handleScan = () => {
     const res = runBlockerScan({
@@ -177,7 +177,7 @@ export default function BlockerRadar() {
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6">
                   <h3 className="text-lg font-bold text-white mb-4">Hidden Blockers (State/Festival)</h3>
                   <div className="space-y-3">
-                    {report.hiddenBlockers.map((hb: any, i: number) => (
+                    {report.hiddenBlockers.map((hb: { label: string; message: string }, i: number) => (
                       <div key={i} className="flex items-start gap-3 bg-[#111111] p-3 rounded-lg border border-[#333]">
                         <AlertTriangle className="text-[#FFD600] shrink-0 mt-0.5" size={16} />
                         <div>

@@ -8,7 +8,7 @@ export default function PersonaLab() {
   const [loading, setLoading] = useState(false);
   const [selectedPersonas, setSelectedPersonas] = useState<string[]>(['S1', 'P1']);
   const [material, setMaterial] = useState('');
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<Record<string, any> | null>(null);
 
   const allPersonas = [...PERSONA_STORE, ...state.savedPersonas];
 

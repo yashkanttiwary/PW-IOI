@@ -72,14 +72,14 @@ export function getCalendarPhase(date = new Date()) {
 }
 
 export function checkDateConflicts(eventDate: Date) {
-  const conflicts: any[] = [];
+  const conflicts: { type: string; label: string; severity: string; message: string }[] = [];
   const d = eventDate.toISOString().split('T')[0];
 
   for (const [key, cal] of Object.entries(ACADEMIC_CALENDAR)) {
     if (d >= cal.start && d <= cal.end) {
       conflicts.push({
         type:     cal.impact,
-        event:    cal.label,
+        label:    cal.label,
         severity: cal.impact === 'BLOCKER_A' ? 'CRITICAL' : 'MEDIUM',
         message:  cal.impact === 'BLOCKER_A'
           ? `This date falls during \${cal.label}. School-based tactics are BLOCKED. Switch to guerrilla/digital.`

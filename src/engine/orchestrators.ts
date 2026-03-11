@@ -11,8 +11,8 @@ import { parseAIResponse } from './ai/responseParser';
 import { PERSONA_STORE } from './persona/personaStore';
 import { compareVariants } from './abTest/scorer';
 
-export async function orchestrateFunnelCommand(mode: string, userInput: any, appState: any, dispatch: any) {
-  let funnelData: any;
+export async function orchestrateFunnelCommand(mode: string, userInput: Record<string, any>, appState: Record<string, any>, dispatch: React.Dispatch<any>) {
+  let funnelData: Record<string, any> = {};
 
   switch (mode) {
     case 'full_semester':
@@ -47,7 +47,7 @@ export async function orchestrateFunnelCommand(mode: string, userInput: any, app
     budgetData = calculateBudgetAllocation({
       totalBudget: userInput.budget,
       channelMix: userInput.channelMix || STATE_PROFILES[userInput.states?.[0]]?.channelMix || {},
-      funnelProjection: funnelData,
+      funnelProjection: funnelData as { stages: { id: string; volume: number }[]; totalAdmissions: number },
     });
   }
 
@@ -91,7 +91,7 @@ export async function orchestrateFunnelCommand(mode: string, userInput: any, app
   return result;
 }
 
-export async function orchestrateEventBuilder(userInput: any, appState: any, dispatch: any) {
+export async function orchestrateEventBuilder(userInput: Record<string, any>, appState: Record<string, any>, dispatch: React.Dispatch<any>) {
   const blockerReport = runBlockerScan({
     planText: userInput.brief || '',
     startDate: new Date(userInput.targetDate),
@@ -146,7 +146,7 @@ export async function orchestrateEventBuilder(userInput: any, appState: any, dis
   return result;
 }
 
-export async function orchestrateCampaignArchitect(userInput: any, appState: any, dispatch: any) {
+export async function orchestrateCampaignArchitect(userInput: Record<string, any>, appState: Record<string, any>, dispatch: React.Dispatch<any>) {
   const campaignFunnel = userInput.targetAdmissions
     ? projectFunnelReverse({
         targetAdmissions: userInput.targetAdmissions,
@@ -168,12 +168,12 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
         totalBudget: userInput.budget,
         channelMix: stateMix,
         funnelProjection: ('stages' in campaignFunnel)
-          ? campaignFunnel
-          : projectFunnelForward({ tofuVolume: (campaignFunnel as any).required?.views || 50000 }),
+          ? campaignFunnel as { stages: { id: string; volume: number }[]; totalAdmissions: number }
+          : projectFunnelForward({ tofuVolume: (campaignFunnel as Record<string, any>).required?.views || 50000 }) as { stages: { id: string; volume: number }[]; totalAdmissions: number },
       })
     : null;
 
-  const admissions = ('totalAdmissions' in campaignFunnel) ? (campaignFunnel as any).totalAdmissions : userInput.targetAdmissions;
+  const admissions = ('totalAdmissions' in campaignFunnel) ? (campaignFunnel as Record<string, any>).totalAdmissions : userInput.targetAdmissions;
   const cacData = calculateCAC(userInput.budget || 0, admissions);
 
   const blockerReport = runBlockerScan({
@@ -185,7 +185,7 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
   const stateIntel = (userInput.states || []).map((s: string) => ({
     state: s,
     profile: STATE_PROFILES[s] || null,
-  })).filter((s: any) => s.profile);
+  })).filter((s: { state: string, profile: Record<string, any> | null }) => s.profile);
 
   const ctx = buildContext('campaign_architect', appState, {
     ...userInput,
@@ -228,7 +228,7 @@ export async function orchestrateCampaignArchitect(userInput: any, appState: any
   return result;
 }
 
-export async function orchestratePersonaSimulation(userInput: any, appState: any, dispatch: any) {
+export async function orchestratePersonaSimulation(userInput: Record<string, any>, appState: Record<string, any>, dispatch: React.Dispatch<any>) {
   const allPersonas = [...PERSONA_STORE, ...appState.savedPersonas];
   const selected = userInput.personaIds.map((id: string) =>
     allPersonas.find(p => p.id === id)
@@ -250,7 +250,7 @@ export async function orchestratePersonaSimulation(userInput: any, appState: any
   return { success: parsed.success, personas: selected, reactions: parsed.data };
 }
 
-export async function orchestrateABTest(userInput: any, appState: any, dispatch: any) {
+export async function orchestrateABTest(userInput: Record<string, any>, appState: Record<string, any>, dispatch: React.Dispatch<any>) {
   const ctx = buildContext('ab_test', appState, userInput);
 
   const aiResult = await callAI({
@@ -263,7 +263,7 @@ export async function orchestrateABTest(userInput: any, appState: any, dispatch:
   const parsed = parseAIResponse(aiResult.text, 'json');
 
   if (parsed.success && parsed.data.variants) {
-    const validated = parsed.data.variants.map((v: any) => ({
+    const validated = parsed.data.variants.map((v: Record<string, any>) => ({
       id: v.id,
       rawScores: {
         studentHook: v.scores?.studentHook?.raw || 5,
@@ -293,7 +293,7 @@ export async function orchestrateABTest(userInput: any, appState: any, dispatch:
   return { success: false, raw: aiResult.text };
 }
 
-export async function orchestrateAudit(planText: string, appState: any, dispatch: any) {
+export async function orchestrateAudit(planText: string, appState: Record<string, any>, dispatch: React.Dispatch<any>) {
   const blockerReport = runBlockerScan({
     planText,
     startDate: new Date(),

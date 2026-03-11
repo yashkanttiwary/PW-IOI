@@ -3,6 +3,8 @@ import { useAppStore } from '../../store/appStore';
 import { orchestrateCampaignArchitect } from '../../engine/orchestrators';
 import BoardSummaryCard from '../shared/BoardSummaryCard';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 
 export default function CampaignArchitect() {
   const { state, dispatch } = useAppStore();
@@ -136,7 +138,7 @@ export default function CampaignArchitect() {
               <BoardSummaryCard data={plan} />
               
               <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 prose prose-invert max-w-none">
-                <ReactMarkdown>{plan.aiPlan}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{plan.aiPlan}</ReactMarkdown>
               </div>
             </>
           ) : (

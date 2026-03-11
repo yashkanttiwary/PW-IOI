@@ -1,7 +1,7 @@
 import { CONVERSION_BENCHMARKS } from '../constants/benchmarks';
 
-export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario = 'realistic', overrides = {} }: any) {
-  const b = CONVERSION_BENCHMARKS as any;
+export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario = 'realistic', overrides = {} }: { tofuVolume: number; channel?: string; scenario?: string; overrides?: Record<string, number> }) {
+  const b = CONVERSION_BENCHMARKS as Record<string, Record<string, { rate: number }>>;
   const getRate = (stage: string) => {
     if (overrides[stage]) return overrides[stage];
     return b[stage][scenario].rate;
@@ -32,12 +32,12 @@ export function projectFunnelForward({ tofuVolume, channel = 'blended', scenario
     channel,
     stages,
     totalAdmissions: stages[stages.length - 1].volume,
-    overallConversionRate: stages[stages.length - 1].volume / tofuVolume,
+    overallConversionRate: tofuVolume > 0 ? stages[stages.length - 1].volume / tofuVolume : 0,
   };
 }
 
-export function projectFunnelReverse({ targetAdmissions, channel = 'blended', scenario = 'realistic', overrides = {} }: any) {
-  const b = CONVERSION_BENCHMARKS as any;
+export function projectFunnelReverse({ targetAdmissions, channel = 'blended', scenario = 'realistic', overrides = {} }: { targetAdmissions: number; channel?: string; scenario?: string; overrides?: Record<string, number> }) {
+  const b = CONVERSION_BENCHMARKS as Record<string, Record<string, { rate: number }>>;
   const getRate = (stage: string) => overrides[stage] || b[stage][scenario].rate;
 
   const firstRate = channel === 'offline'
@@ -67,7 +67,7 @@ export function projectFunnelReverse({ targetAdmissions, channel = 'blended', sc
   };
 }
 
-export function compareScenarios({ tofuVolume, channel = 'blended' }: any) {
+export function compareScenarios({ tofuVolume, channel = 'blended' }: { tofuVolume: number; channel?: string }) {
   return {
     optimistic:   projectFunnelForward({ tofuVolume, channel, scenario: 'optimistic' }),
     realistic:    projectFunnelForward({ tofuVolume, channel, scenario: 'realistic' }),

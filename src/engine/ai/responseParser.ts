@@ -17,7 +17,7 @@ export function parseAIResponse(rawText: string, expectedFormat: string) {
   }
 
   if (expectedFormat === 'audit_line') {
-    const scores: any = {};
+    const scores: Record<string, any> = {};
     const hookMatch = rawText.match(/Hook:\s*(\d+)\/10/);
     const trustMatch = rawText.match(/Trust:\s*(\d+)\/10/);
     const overallMatch = rawText.match(/Overall:\s*(\d+)\/100/);

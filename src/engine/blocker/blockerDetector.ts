@@ -1,12 +1,12 @@
 import { getCalendarPhase, checkDateConflicts, NATIONAL_FESTIVALS } from '../calendar/calendarEngine';
 import { STATE_PROFILES } from '../constants/stateProfiles';
 
-export function runBlockerScan({ planText, startDate, endDate, targetState }: any) {
+export function runBlockerScan({ planText, startDate, endDate, targetState }: { planText: string; startDate: Date; endDate?: Date; targetState?: string | null }) {
   const report = {
     blockerA: { status: '✅', severity: 'CLEAR', findings: [] as string[], hack: null as string | null },
     blockerB: { status: '✅', severity: 'CLEAR', findings: [] as string[], hack: null as string | null },
     blockerC: { status: '✅', severity: 'CLEAR', findings: [] as string[], hack: null as string | null },
-    hiddenBlockers: [] as any[],
+    hiddenBlockers: [] as { type: string; severity: string; label: string; message: string }[],
     overallScore: 10,
   };
 

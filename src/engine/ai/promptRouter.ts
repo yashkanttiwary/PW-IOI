@@ -1,7 +1,7 @@
 import { CONVERSION_BENCHMARKS } from '../constants/benchmarks';
 import { STATE_PROFILES } from '../constants/stateProfiles';
 
-export function getModulePrompt(moduleId: string, context: any = {}) {
+export function getModulePrompt(moduleId: string, context: Record<string, any> = {}) {
   const prompts: Record<string, string> = {
     funnel_command: `
 MODULE ACTIVE: FUNNEL COMMAND
@@ -109,7 +109,7 @@ MODULE ACTIVE: PERSONA SIMULATION
 You are now simulating one or more audience personas reacting to marketing material.
 
 PERSONA DATA:
-${context.personas?.map((p: any) => `
+${context.personas?.map((p: { id: string; name: string; psychology: string; hooks: string[]; repels: string[]; decisionStyle: string; parentGate: string }) => `
 ${p.id} — ${p.name}:
   Psychology: ${p.psychology}
   Hooks: ${p.hooks}

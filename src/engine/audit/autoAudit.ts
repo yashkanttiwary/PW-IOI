@@ -4,7 +4,7 @@ import { BRAND_SYSTEM_PROMPT } from '../ai/brandSystemPrompt';
 import { getModulePrompt } from '../ai/promptRouter';
 import { parseAIResponse } from '../ai/responseParser';
 
-export async function runAutoAudit(planText: string, auditContext: any = {}) {
+export async function runAutoAudit(planText: string, auditContext: Record<string, any> = {}) {
   const clientChecks = {
     blockers: auditContext.blockerReport || runBlockerScan({
       planText,

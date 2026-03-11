@@ -2,7 +2,7 @@ import React from 'react';
 import { THEME } from '../../engine/constants/theme';
 import { formatNumber, formatPercent } from '../../utils/formatCurrency';
 
-export default function FunnelWaterfall({ stages }: { stages: any[] }) {
+export default function FunnelWaterfall({ stages }: { stages: { id: string; volume: number; rate: number; dropoff: number }[] }) {
   if (!stages || stages.length === 0) return null;
 
   const maxVolume = stages[0].volume;

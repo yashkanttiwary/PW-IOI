@@ -2,8 +2,8 @@ import { getCalendarPhase } from '../calendar/calendarEngine';
 import { runBlockerScan } from '../blocker/blockerDetector';
 import { PERSONA_STORE } from '../persona/personaStore';
 
-export function buildContext(moduleId: string, appState: any, userInput: any) {
-  const ctx: any = {
+export function buildContext(moduleId: string, appState: Record<string, any>, userInput: Record<string, any>) {
+  const ctx: Record<string, any> = {
     calendarPhase: getCalendarPhase(userInput.targetDate ? new Date(userInput.targetDate) : new Date()),
     blockers: null,
     blockerReport: null,
@@ -14,8 +14,8 @@ export function buildContext(moduleId: string, appState: any, userInput: any) {
     ctx.blockerReport = runBlockerScan({
       planText: userInput.brief || '',
       startDate: new Date(dateToUse),
-      endDate: userInput.endDate ? new Date(userInput.endDate) : null,
-      targetState: userInput.states?.[0] || userInput.campus || null,
+      endDate: userInput.endDate ? new Date(userInput.endDate) : undefined,
+      targetState: userInput.states?.[0] || userInput.campus || undefined,
     });
     ctx.blockers = [
       `A:\${ctx.blockerReport.blockerA.status}`,
@@ -48,13 +48,13 @@ export function buildContext(moduleId: string, appState: any, userInput: any) {
 
     case 'persona_simulate':
       ctx.personas = userInput.selectedPersonas?.map((id: string) =>
-        PERSONA_STORE.find(p => p.id === id) || appState.savedPersonas.find((p: any) => p.id === id)
+        PERSONA_STORE.find(p => p.id === id) || appState.savedPersonas?.find((p: { id: string }) => p.id === id)
       ).filter(Boolean);
       break;
 
     case 'ab_test':
       ctx.personas = userInput.selectedPersonas?.map((id: string) =>
-        PERSONA_STORE.find(p => p.id === id) || appState.savedPersonas.find((p: any) => p.id === id)
+        PERSONA_STORE.find(p => p.id === id) || appState.savedPersonas?.find((p: { id: string }) => p.id === id)
       ).filter(Boolean);
       ctx.testGoal = userInput.testGoal;
       break;

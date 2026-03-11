@@ -3,12 +3,14 @@ import { useAppStore } from '../../store/appStore';
 import { orchestrateAudit } from '../../engine/orchestrators';
 import { CheckSquare, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 
 export default function CampaignAuditor() {
   const { state, dispatch } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [planText, setPlanText] = useState('');
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<Record<string, any> | null>(null);
 
   const handleAudit = async () => {
     if (!planText) return;
@@ -81,7 +83,7 @@ export default function CampaignAuditor() {
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6">
                   <h3 className="text-lg font-bold text-white mb-4">Dimension Scores</h3>
                   <div className="space-y-3">
-                    {report.parsed.dimensions?.map((d: any) => (
+                    {report.parsed.dimensions?.map((d: { id: string; name: string; score: number }) => (
                       <div key={d.id} className="flex justify-between items-center text-sm">
                         <span className="text-[#A0A0A0]">{d.name}</span>
                         <div className="flex items-center gap-2">
@@ -105,7 +107,7 @@ export default function CampaignAuditor() {
                         <AlertTriangle size={20} /> Critical Failures
                       </h3>
                       <div className="space-y-3">
-                        {report.parsed.criticalFailures.map((cf: any, i: number) => (
+                        {report.parsed.criticalFailures.map((cf: { dimension: string; fix: string }, i: number) => (
                           <div key={i} className="text-sm text-white">
                             <span className="font-bold">{cf.dimension}: </span>
                             {cf.fix}
@@ -145,7 +147,7 @@ export default function CampaignAuditor() {
               {report.parsed.improvedVersion && (
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-6 prose prose-invert max-w-none">
                   <h3 className="text-lg font-bold text-[#00F5FF] mb-4">Improved Version</h3>
-                  <ReactMarkdown>{report.parsed.improvedVersion}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{report.parsed.improvedVersion}</ReactMarkdown>
                 </div>
               )}
             </>

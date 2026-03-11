@@ -16,7 +16,7 @@ export default function ABTestStudio() {
     variantC: ''
   });
 
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<Record<string, any> | null>(null);
 
   const handleTest = async () => {
     if (!formData.variantA || !formData.variantB) return;
@@ -127,9 +127,9 @@ export default function ABTestStudio() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {results.variants.map((v: any) => {
+                {results.variants.map((v: { id: string; blockerBFlag: boolean; antiPatterns: string[] }) => {
                   const isWinner = v.id === results.comparison.winner.id;
-                  const scoreData = results.comparison.rankings.find((r: any) => r.id === v.id);
+                  const scoreData = results.comparison.rankings.find((r: { id: string; totalScore: number; scores: Record<string, { weighted: number }> }) => r.id === v.id);
                   
                   return (
                     <div key={v.id} className={`bg-[#1A1A1A] border rounded-xl p-6 \${isWinner ? 'border-[#00F5FF]' : 'border-[#333]'}`}>
@@ -144,7 +144,7 @@ export default function ABTestStudio() {
                       </div>
 
                       <div className="space-y-3 mb-6">
-                        {Object.entries(scoreData.scores).map(([dim, s]: [string, any]) => (
+                        {Object.entries(scoreData.scores as Record<string, { weighted: number }>).map(([dim, s]) => (
                           <div key={dim} className="flex justify-between items-center text-sm">
                             <span className="text-[#A0A0A0] capitalize">{dim.replace(/([A-Z])/g, ' $1').trim()}</span>
                             <div className="flex items-center gap-2">

@@ -57,3 +57,75 @@
   font-family: var(--font-mono);
   font-size: 0.875em;
 }
+
+/* Table Styles for Markdown */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  font-size: 0.875rem;
+  text-align: left;
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.prose thead {
+  background-color: #111;
+  border-bottom: 2px solid #333;
+}
+
+.prose th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  border-right: 1px solid #333;
+}
+
+.prose th:last-child {
+  border-right: none;
+}
+
+.prose tbody tr {
+  border-bottom: 1px solid #333;
+  transition: background-color 0.2s ease;
+}
+
+.prose tbody tr:last-child {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover {
+  background-color: #1a1a1a;
+}
+
+.prose td {
+  padding: 0.75rem 1rem;
+  color: #D4D4D4;
+  border-right: 1px solid #333;
+  vertical-align: top;
+}
+
+.prose td:last-child {
+  border-right: none;
+}
+
+/* Make sure tables don't break layout on small screens */
+.prose .table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1.5em;
+  border-radius: 0.5rem;
+  border: 1px solid #333;
+}
+
+.prose .table-wrapper table {
+  margin: 0;
+  border: none;
+}

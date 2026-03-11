@@ -25,7 +25,7 @@ export const INITIAL_STATE = {
   },
 };
 
-export function appReducer(state: any, action: any) {
+export function appReducer(state: Record<string, any>, action: { type: string; payload?: any }) {
   switch (action.type) {
     case 'SET_MODULE':
       return {
@@ -109,19 +109,44 @@ export function appReducer(state: any, action: any) {
         },
       };
 
+    case 'LOAD_STATE':
+      return { ...state, ...action.payload, currentModule: 'dashboard' };
+
     default:
       return state;
   }
 }
 
-const AppContext = createContext<{ state: any; dispatch: React.Dispatch<any> } | undefined>(undefined);
+const AppContext = createContext<{ state: Record<string, any>; dispatch: React.Dispatch<any> } | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, INITIAL_STATE);
+  const [isLoaded, setIsLoaded] = React.useState(false);
 
   useEffect(() => {
+    const savedState = localStorage.getItem('ion_app_state');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        dispatch({ type: 'LOAD_STATE', payload: parsed });
+      } catch (e) {
+        console.error('Failed to load state from localStorage', e);
+      }
+    }
     dispatch({ type: 'SET_CALENDAR_PHASE', payload: getCalendarPhase() });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('ion_app_state', JSON.stringify(state));
+    }
+  }, [state, isLoaded]);
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">Loading...</div>;
+  }
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

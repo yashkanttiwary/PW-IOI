@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 
-const MODULE_CONFIG: Record<string, any> = {
+const MODULE_CONFIG: Record<string, { maxTokens: number; temp: number; stream: boolean }> = {
   dashboard:         { maxTokens: 500,  temp: 0.2, stream: false },
   funnel_command:    { maxTokens: 4000, temp: 0.2, stream: true  },
   event_builder:     { maxTokens: 6000, temp: 0.3, stream: true  },
@@ -14,7 +14,7 @@ const MODULE_CONFIG: Record<string, any> = {
   copy_generator:    { maxTokens: 1500, temp: 0.7, stream: false },
 };
 
-export async function callAI({ module, systemPrompt, modulePrompt, messages }: any) {
+export async function callAI({ module, systemPrompt, modulePrompt, messages }: { module: string; systemPrompt: string; modulePrompt: string; messages: { role: string; content: string }[] }) {
   const config = MODULE_CONFIG[module] || MODULE_CONFIG.dashboard;
   const startTime = Date.now();
 
@@ -25,7 +25,7 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages }: a
     const fullSystemInstruction = systemPrompt + '\\n\\n' + modulePrompt;
     
     // Format messages for Gemini
-    const contents = messages.map((m: any) => ({
+    const contents = messages.map((m: { role: string; content: string }) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
@@ -46,13 +46,13 @@ export async function callAI({ module, systemPrompt, modulePrompt, messages }: a
       text: response.text || '',
       latencyMs: Date.now() - startTime,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(`ION AI call failed [\${module}]:`, err);
     return {
       success: false,
       data: null,
       text: '',
-      error: err.message,
+      error: err instanceof Error ? err.message : String(err),
       latencyMs: Date.now() - startTime,
     };
   }

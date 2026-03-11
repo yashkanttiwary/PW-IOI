@@ -28,7 +28,7 @@ export function applyWeights(rawScores: Record<string, number>) {
   };
 }
 
-export function compareVariants(variants: any[]) {
+export function compareVariants(variants: { id: string; rawScores: Record<string, number>; blockerBFlag: boolean; antiPatterns: string[] }[]) {
   const scored = variants.map(v => ({
     id: v.id,
     ...applyWeights(v.rawScores),

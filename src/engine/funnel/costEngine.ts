@@ -1,4 +1,4 @@
-export function calculateBudgetAllocation({ totalBudget, channelMix, funnelProjection }: any) {
+export function calculateBudgetAllocation({ totalBudget, channelMix, funnelProjection }: { totalBudget: number; channelMix: Record<string, number>; funnelProjection: { stages: { id: string; volume: number }[]; totalAdmissions: number } }) {
   const stageAllocation = {
     tofu:     0.35, 
     mofu:     0.40, 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function AutoAuditBar({ audit }: { audit: any }) {
+export default function AutoAuditBar({ audit }: { audit: Record<string, any> }) {
   if (!audit) {
     return (
       <div className="fixed bottom-0 left-64 right-0 bg-[#111111] border-t border-[#333] p-3 flex items-center justify-center">

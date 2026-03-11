@@ -18,9 +18,9 @@ export function buildContext(moduleId: string, appState: Record<string, any>, us
       targetState: userInput.states?.[0] || userInput.campus || undefined,
     });
     ctx.blockers = [
-      `A:\${ctx.blockerReport.blockerA.status}`,
-      `B:\${ctx.blockerReport.blockerB.status}`,
-      `C:\${ctx.blockerReport.blockerC.status}`,
+      `A:${ctx.blockerReport.blockerA.status}`,
+      `B:${ctx.blockerReport.blockerB.status}`,
+      `C:${ctx.blockerReport.blockerC.status}`,
     ].join(' ');
   }
 

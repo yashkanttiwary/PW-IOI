@@ -82,8 +82,8 @@ export function checkDateConflicts(eventDate: Date) {
         label:    cal.label,
         severity: cal.impact === 'BLOCKER_A' ? 'CRITICAL' : 'MEDIUM',
         message:  cal.impact === 'BLOCKER_A'
-          ? `This date falls during \${cal.label}. School-based tactics are BLOCKED. Switch to guerrilla/digital.`
-          : `\${cal.label} is active. This is \${cal.impact === 'CLOSING_OPPORTUNITY' ? 'an OPPORTUNITY — activate close tactics' : 'a competitor window — differentiate aggressively'}.`,
+          ? `This date falls during ${cal.label}. School-based tactics are BLOCKED. Switch to guerrilla/digital.`
+          : `${cal.label} is active. This is ${cal.impact === 'CLOSING_OPPORTUNITY' ? 'an OPPORTUNITY — activate close tactics' : 'a competitor window — differentiate aggressively'}.`,
       });
     }
   }

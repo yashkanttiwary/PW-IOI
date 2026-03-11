@@ -45,7 +45,7 @@ export default function Sidebar() {
             <button
               key={mod.id}
               onClick={() => dispatch({ type: 'SET_MODULE', payload: mod.id })}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors \${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive 
                   ? 'bg-[#1A4FBF] text-white' 
                   : 'text-[#A0A0A0] hover:bg-[#252525] hover:text-white'

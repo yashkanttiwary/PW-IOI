@@ -16,7 +16,7 @@ export function runBlockerScan({ planText, startDate, endDate, targetState }: { 
       report.blockerA = {
         status: '🚫',
         severity: 'CRITICAL',
-        findings: [`Plan date falls in Dead Zone (\${startDate.toLocaleDateString()}). Schools are closed. No auditorium events, no principal outreach.`],
+        findings: [`Plan date falls in Dead Zone (${startDate.toLocaleDateString()}). Schools are closed. No auditorium events, no principal outreach.`],
         hack: 'Switch to: (1) Guerrilla activations outside exam centers, (2) Trojan Horse school farewell sponsorships, (3) Digital-only community building. Save physical events for June Closing Window.',
       };
       report.overallScore -= 4;
@@ -45,7 +45,7 @@ export function runBlockerScan({ planText, startDate, endDate, targetState }: { 
     if (textLower.includes(word)) {
       const phase = startDate ? getCalendarPhase(startDate) : null;
       if (phase && phase.id === 'DEAD_ZONE') {
-        report.blockerA.findings.push(`Contains "\${word}" — not possible during Dead Zone.`);
+        report.blockerA.findings.push(`Contains "${word}" — not possible during Dead Zone.`);
       }
     }
   });
@@ -99,7 +99,7 @@ export function runBlockerScan({ planText, startDate, endDate, targetState }: { 
           type: 'FESTIVAL',
           label: f.name,
           severity: f.impact === 'high' ? 'HIGH' : 'MEDIUM',
-          message: `\${f.name} falls in this period. \${f.note}`,
+          message: `${f.name} falls in this period. ${f.note}`,
         });
         report.overallScore -= f.impact === 'high' ? 1 : 0.5;
       }

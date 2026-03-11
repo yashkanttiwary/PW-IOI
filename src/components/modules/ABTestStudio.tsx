@@ -132,11 +132,11 @@ export default function ABTestStudio() {
                   const scoreData = results.comparison.rankings.find((r: { id: string; totalScore: number; scores: Record<string, { weighted: number }> }) => r.id === v.id);
                   
                   return (
-                    <div key={v.id} className={`bg-[#1A1A1A] border rounded-xl p-6 \${isWinner ? 'border-[#00F5FF]' : 'border-[#333]'}`}>
+                    <div key={v.id} className={`bg-[#1A1A1A] border rounded-xl p-6 ${isWinner ? 'border-[#00F5FF]' : 'border-[#333]'}`}>
                       <div className="flex justify-between items-center mb-6 border-b border-[#333] pb-4">
                         <h3 className="text-xl font-bold text-white">Variant {v.id}</h3>
                         <div className="text-right">
-                          <div className={`text-3xl font-bold \${getGradeColor(scoreData.grade)}`}>
+                          <div className={`text-3xl font-bold ${getGradeColor(scoreData.grade)}`}>
                             {scoreData.total}
                           </div>
                           <div className="text-xs text-[#A0A0A0]">/ 90 pts</div>
@@ -151,7 +151,7 @@ export default function ABTestStudio() {
                               <div className="w-24 h-2 bg-[#111111] rounded-full overflow-hidden">
                                 <div 
                                   className="h-full bg-[#1A4FBF]" 
-                                  style={{ width: `\${(s.raw / 10) * 100}%` }}
+                                  style={{ width: `${(s.raw / 10) * 100}%` }}
                                 ></div>
                               </div>
                               <span className="font-mono text-white w-8 text-right">{s.weighted}</span>
